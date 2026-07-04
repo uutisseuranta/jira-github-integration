@@ -97,7 +97,7 @@ Custom kenttien **display nimet** varmistettu suoraan Jira Cloud -instanssista
 
 | # | Kenttä | GitHub-vastine | Jira-vastine | Auktoriteetti | GitHub → Jira | Jira → GitHub | Konfliktiresoluutio |
 |---|---|---|---|---|---|---|---|
-| 1 | Otsikko | `title` | `summary` | GitHub | ✅ | ⛔ (D-002) | Yksisuuntainen: GitHub → Jira |
+| 1 | Otsikko | `title` | `summary` | Molemmat | ✅ etuliite `[GitHub]` lisätään Jiraan | ✅ etuliite `[Jira]` lisätään GitHubiin; `[GitHub]`-alkuiset skippataan | Etuliite estää silmukan; molempiin suuntiin |
 | 2 | Kuvaus | `body` (Markdown) | `description` (plain text) | GitHub | ✅ | ✅ | GitHub voittaa; Markdown säilyy plain textinä Jirassa |
 | 3 | Tila | `state` (open/closed) | `status` (workflow) | Jira | ✅ open→To Do, closed→Done | ✅ Done→close, muut→open+label | Jira-status on master |
 | 4 | Labelit | `labels[]` | `labels[]` | GitHub | ✅ luo uudet Jiraan | ✅ unioni molempiin | Ei ylikirjoiteta; lisätään puuttuvat |
@@ -144,9 +144,46 @@ TRIGGER  →  [CONDITIONS]  →  ACTIONS
 
 ### Silmukan esto (kaikki säännöt)
 
-Kommenttisäännöissä tarkistetaan etuliite: ei prosessoida kommenttia joka alkaa `[GitHub]` tai `[Jira]`.
+Silmukkaesto perustuu **etuliitelogiikkaan** — sama periaate koskee sekä kommentteja että otsikkosynkronointia:
 
-> Katso tarkemmin [issue #1](https://github.com/uutisseuranta/jira-github-integration/issues/1).
+- Automaatio lisää etuliitteen **`[GitHub]`** kaikkiin arvoihin, jotka se kirjoittaa Jiraan (kommentit, summary).
+- Automaatio lisää etuliitteen **`[Jira]`** kaikkiin arvoihin, jotka se kirjoittaa GitHubiin (kommentit, title).
+- Jokainen flow tarkistaa saapuvan arvon ensin: jos se **alkaa** `[GitHub]` tai `[Jira]`, flow **skippataan** — arvo on automaation itsensä tuottama, ei käyttäjän muutos.
+
+#### Käytännön esimerkki — otsikko
+
+```
+Käyttäjä muuttaa GitHub-issuen titlen: "Uusi otsikko"
+  → GitHub → Jira (Sääntö 2/13): kirjoittaa Jiraan "[GitHub] Uusi otsikko"
+
+Jira havaitsee summary-muutoksen:
+  → Jira → GitHub (Sääntö 13): tarkistaa → alkaa "[GitHub]" → SKIP
+
+Käyttäjä muuttaa Jiran summaryn: "Korjattu otsikko"
+  → Jira → GitHub (Sääntö 13): kirjoittaa GitHubiin "[Jira] Korjattu otsikko"
+
+GitHub havaitsee title-muutoksen:
+  → GitHub → Jira (Sääntö 2/13): tarkistaa → alkaa "[Jira]" → SKIP
+```
+
+#### Käytännön esimerkki — kommentti
+
+```
+Käyttäjä kirjoittaa GitHub-kommentin: "Katso tämä"
+  → Sääntö 8 kirjoittaa Jiraan: "[GitHub] @user: Katso tämä"
+
+Jira havaitsee uuden kommentin:
+  → Sääntö 14: tarkistaa → alkaa "[GitHub]" → SKIP
+
+Käyttäjä kirjoittaa Jira-kommentin: "Selvä"
+  → Sääntö 14 kirjoittaa GitHubiin: "[Jira] Nimi: Selvä"
+
+GitHub havaitsee uuden kommentin:
+  → Sääntö 8: tarkistaa → alkaa "[Jira]" → SKIP
+```
+
+> **Huom:** Etuliitteet `[GitHub]` ja `[Jira]` näkyvät loppukäyttäjille kommenteissa ja otsikoissa.
+> Tämä on tietoinen valinta — etuliite kertoo, mistä järjestelmästä muutos on peräisin.
 
 ---
 
@@ -182,11 +219,13 @@ Condition: {{smart values}} condition
 |--------|------|
 | Space | `Uutisseuranta (US)` |
 | Work item type | `Story` |
-| Summary | `{{webhookData.issue.title}}` |
+| Summary | `[GitHub] {{webhookData.issue.title}}` |
 | Description | `{{webhookData.issue.body}}` |
 | `customfield_10071` | `{{webhookData.repository.name}}` |
 | `customfield_10072` | `{{webhookData.issue.number}}` |
 | `customfield_10073` | `{{webhookData.issue.html_url}}` |
+
+> **Huom:** Summary kirjoitetaan aina etuliitteellä `[GitHub]` — tämä estää Jira→GitHub-silmukan Sääntö 13:ssa.
 
 ---
 
@@ -207,11 +246,15 @@ Action: Lookup work items
 
 Condition: {{lookupIssues.size}} greater than 0
 
+Condition (silmukkaesto — title): {{webhookData.issue.title}} does not start with "[Jira]"
+
 Action: Edit work item
   → Work item: {{lookupIssues.first.key}}
-  → Summary:     {{webhookData.issue.title}}
+  → Summary:     [GitHub] {{webhookData.issue.title}}
   → Description: {{webhookData.issue.body}}
 ```
+
+> **Huom:** Summary kirjoitetaan etuliitteellä `[GitHub]`. Ensin tarkistetaan, ettei title alkanut `[Jira]` — se tarkoittaisi, että GitHubin muutos on automaation itsensä tekemä (Sääntö 13 kirjoitti sen), ja silloin Jiraa ei päivitetä.
 
 ---
 
@@ -439,11 +482,25 @@ Action: Send web request  (lisää sprint-label)
 
 ---
 
-### Sääntö 13: Jira summary muuttuu → GitHub otsikko (poistettu)
+### Sääntö 13: Jira summary muuttuu → Päivitä GitHub title
 
-> **Poistettu** (D-002) — Free-tierillä silmukkaesto ei ole teknisesti toteutettavissa.  
-> Otsikkosynkronointi on yksisuuntainen: GitHub → Jira.  
-> Katso [issue #1](https://github.com/uutisseuranta/jira-github-integration/issues/1) ja [issue #7](https://github.com/uutisseuranta/jira-github-integration/issues/7).
+**Tila:** Suunniteltu (TODO)
+
+```
+Trigger: Field value changed → Field: Summary
+
+Condition: customfield_10072 is not empty
+
+Condition (silmukkaesto): {{issue.summary}} does not start with "[GitHub]"
+
+Action: Send web request
+  → Method: PATCH
+  → URL: [URL-pohja]
+  → Body: {"title": "[Jira] {{issue.summary}}"}
+```
+
+> **Silmukkaesto:** Jos summary alkaa `[GitHub]`, se on Sääntö 2:n kirjoittama — ei käyttäjän muutos, joten flow skippataan.  
+> GitHub-päässä Sääntö 2 tarkistaa vastaavasti, ettei title alkanut `[Jira]` ennen kuin kirjoittaa Jiraan.
 
 ---
 
@@ -718,11 +775,12 @@ curl -s -X POST \
 | Sprint → GitHub natiivikäsite | Hyväksytty: sprint näkyy GitHubissa vain labelina `sprint:N` |
 | Konfliktiresoluutio | Yksinkertainen sääntö: uudempi `updated_at` voittaa |
 | Assignee-synkronointi | Poistettu (D-005) — katso [issue #2](https://github.com/uutisseuranta/jira-github-integration/issues/2) |
-| Otsikkosynkronointi Jira→GitHub | Poistettu (D-002) — katso [issue #7](https://github.com/uutisseuranta/jira-github-integration/issues/7) |
+| Otsikkosynkronointi Jira→GitHub | Toteutettu etuliitelogiikalla — katso Silmukan esto ja Sääntö 13 |
 | Label-akkumuloituminen | Hyväksytty (D-006) — katso [issue #3](https://github.com/uutisseuranta/jira-github-integration/issues/3) |
 | Duplikaatit | Siivotaan käsin tarvittaessa (D-003) — katso [issue #10](https://github.com/uutisseuranta/jira-github-integration/issues/10) |
 | Automation-kutsumäärä | Jira Automation Free: 500 kutsua/kk (D-001) |
 | Historiallinen backfill | Ei toteuteta (D-004) — katso [issue #9](https://github.com/uutisseuranta/jira-github-integration/issues/9) |
+| Etuliitteet otsikoissa/kommenteissa | Hyväksytty: `[GitHub]`/`[Jira]`-etuliite näkyy käyttäjille — tarkoituksellinen valinta |
 
 ---
 
