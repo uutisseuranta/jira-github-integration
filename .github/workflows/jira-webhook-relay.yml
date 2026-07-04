@@ -12,11 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send to Jira Automation
-        if: ${{ secrets.JIRA_WEBHOOK_URL != '' }}
         env:
           JIRA_WEBHOOK_TOKEN: ${{ secrets.JIRA_WEBHOOK_TOKEN }}
           JIRA_WEBHOOK_URL: ${{ secrets.JIRA_WEBHOOK_URL }}
         run: |
+          if [ -z "$JIRA_WEBHOOK_URL" ]; then
+            echo "::warning::Jira Webhook URL (JIRA_WEBHOOK_URL) secret is missing! Skipping relay."
+            exit 0
+          fi
           echo '${{ toJson(github.event) }}' | \
           curl -s -X POST \
             "$JIRA_WEBHOOK_URL" \
