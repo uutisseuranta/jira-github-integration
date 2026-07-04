@@ -650,7 +650,7 @@ Ennen PR:n hyväksymistä seuraavien CI-tarkistusten on mentävä onnistuneesti 
 *   **uutisseuranta.github.io**:
     *   Frontend-testit ja syntaksi (ESLint/TypeScript)
 *   **jira-github-integration**:
-    *   Deployment-työkulun syntaksitarkistus (YAML lint)
+    *   Sääntöjen automaattinen validointi (Python-testit `test-rules.py` varmistamassa L-002, L-006, JSON-validiuden jne.) ja YAML syntaksitarkistus
 
 ### 3. Koodivastuut (CODEOWNERS)
 *   Jokaisessa repositoriossa määritellään `CODEOWNERS`-tiedosto juurikansiossa.
