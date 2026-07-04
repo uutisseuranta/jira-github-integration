@@ -1,0 +1,75 @@
+{
+  "name": "Sääntö 8: GitHub issue comment created → Comment on work item",
+  "state": "ENABLED",
+  "canOtherRuleTrigger": false,
+  "notifyOnError": "FIRSTERROR",
+  "trigger": {
+    "component": "TRIGGER",
+    "type": "jira.trigger.incoming.webhook",
+    "value": {
+      "webhookType": "NO_ISSUES"
+    }
+  },
+  "components": [
+    {
+      "component": "CONDITION",
+      "type": "jira.condition.if",
+      "value": {
+        "conditions": [
+          {
+            "first": "{{webhookData.action}}",
+            "operator": "EQUALS",
+            "second": "created"
+          }
+        ],
+        "operator": "AND"
+      }
+    },
+    {
+      "component": "ACTION",
+      "type": "jira.issue.lookup",
+      "value": {
+        "query": {
+          "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
+        },
+        "variableName": "lookupIssues"
+      }
+    },
+    {
+      "component": "CONDITION",
+      "type": "jira.condition.if",
+      "value": {
+        "conditions": [
+          {
+            "first": "{{lookupIssues.size}}",
+            "operator": "GREATER_THAN",
+            "second": "0"
+          }
+        ],
+        "operator": "AND"
+      }
+    },
+    {
+      "component": "CONDITION",
+      "type": "jira.condition.if",
+      "value": {
+        "conditions": [
+          {
+            "first": "{{webhookData.comment.body}}",
+            "operator": "NOT_STARTS_WITH",
+            "second": "[Jira]"
+          }
+        ],
+        "operator": "AND"
+      }
+    },
+    {
+      "component": "ACTION",
+      "type": "jira.issue.comment",
+      "value": {
+        "issueKey": "{{lookupIssues.first.key}}",
+        "comment": "[GitHub] @{{webhookData.comment.user.login}}: {{webhookData.comment.body}}"
+      }
+    }
+  ]
+}

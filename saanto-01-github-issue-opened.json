@@ -1,0 +1,54 @@
+{
+  "name": "Sääntö 1: GitHub issue opened → Luo Jira work item",
+  "state": "ENABLED",
+  "canOtherRuleTrigger": false,
+  "notifyOnError": "FIRSTERROR",
+  "trigger": {
+    "component": "TRIGGER",
+    "type": "jira.trigger.incoming.webhook",
+    "value": {
+      "webhookType": "NO_ISSUES"
+    }
+  },
+  "components": [
+    {
+      "component": "ACTION",
+      "type": "jira.issue.lookup",
+      "value": {
+        "query": {
+          "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
+        },
+        "variableName": "lookupIssues"
+      }
+    },
+    {
+      "component": "CONDITION",
+      "type": "jira.condition.if",
+      "value": {
+        "conditions": [
+          {
+            "first": "{{lookupIssues.size}}",
+            "operator": "EQUALS",
+            "second": "0"
+          }
+        ],
+        "operator": "AND"
+      }
+    },
+    {
+      "component": "ACTION",
+      "type": "jira.issue.create",
+      "value": {
+        "project": "US",
+        "issuetype": "Story",
+        "fields": {
+          "summary": "[GitHub] {{webhookData.issue.title}}",
+          "description": "{{webhookData.issue.body}}",
+          "customfield_10071": "{{webhookData.repository.name}}",
+          "customfield_10072": "{{webhookData.issue.number}}",
+          "customfield_10073": "{{webhookData.issue.html_url}}"
+        }
+      }
+    }
+  ]
+}

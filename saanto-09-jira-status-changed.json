@@ -1,0 +1,58 @@
+{
+  "name": "Sääntö 9: Jira status muuttuu → Päivitä GitHub issue state",
+  "state": "DISABLED",
+  "canOtherRuleTrigger": false,
+  "notifyOnError": "FIRSTERROR",
+  "_comment": "Tila: Suunniteltu (TODO). Label-poistologiikka poistettu (D-006).",
+  "trigger": {
+    "component": "TRIGGER",
+    "type": "jira.trigger.issue.transitioned",
+    "value": {}
+  },
+  "components": [
+    {
+      "component": "CONDITION",
+      "type": "jira.condition.if",
+      "value": {
+        "conditions": [
+          {
+            "first": "{{issue.customfield_10072}}",
+            "operator": "IS_NOT_EMPTY"
+          }
+        ],
+        "operator": "AND"
+      }
+    },
+    {
+      "component": "ACTION",
+      "type": "jira.util.send.web.request",
+      "value": {
+        "method": "PATCH",
+        "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
+        "headers": {
+          "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "state": "{{#if issue.status.name == 'Done'}}closed{{else}}open{{/if}}",
+          "state_reason": "{{#if issue.status.name == 'Done'}}completed{{/if}}"
+        }
+      }
+    },
+    {
+      "component": "ACTION",
+      "type": "jira.util.send.web.request",
+      "value": {
+        "method": "POST",
+        "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}/labels",
+        "headers": {
+          "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "labels": ["status:{{issue.status.name | toLower}}"]
+        }
+      }
+    }
+  ]
+}
