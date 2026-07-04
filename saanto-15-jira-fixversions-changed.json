@@ -41,15 +41,14 @@
       "component": "ACTION",
       "type": "jira.util.send.web.request",
       "value": {
-        "_comment": "Jos milestone löytyy nimellä: PATCH. Jos ei: POST /milestones.",
-        "method": "POST",
-        "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/milestones",
+        "method": "PATCH",
+        "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
         "headers": {
           "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
           "Content-Type": "application/json"
         },
         "body": {
-          "title": "{{issue.fixVersions[0].name}}"
+          "milestone": "{{webhookResponse.body.find(x => x.title == issue.fixVersions.first.name).number}}"
         }
       }
     }

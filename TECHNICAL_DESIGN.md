@@ -613,6 +613,22 @@ curl -s -X POST \
 
 ---
 
+## Toteutusjärjestys
+
+| Vaihe | Kuvaus | Tila |
+|---|---|---|
+| 1 | Luo custom-kentät Jiraan (source_repo, github_issue_number, github_url) | ✅ VALMIS |
+| 2 | Asenna GitHub for Jira -app, yhdistä kaikki repot | ✅ VALMIS |
+| 3 | Tallenna GitHub PAT + Jira Automation webhook URL secreteihin | ✅ VALMIS |
+| 4 | Luo relay-workflow (`jira-webhook-relay.yml`) | ✅ VALMIS |
+| 5 | Sääntö 1: GitHub issue opened → Luo Jira work item | ✅ VALMIS (testattu, US-7) |
+| 6 | Säännöt 2–8: Testaa ja ota käyttöön GitHub → Jira | 🔄 Käynnissä (issue #7) |
+| 7 | Säännöt 9–15: Toteuta Jira → GitHub | 📋 Suunniteltu (issue #8) |
+| 8 | Lisää JIRA_BASE_URL secret + aja historia-migraatio | 📋 Suunniteltu (issue #9) |
+| 9 | Backfill-validointi | 📋 Suunniteltu (issue #10) |
+
+---
+
 ## Linkit
 
 - [Cloud Automation — resources](https://support.atlassian.com/cloud-automation/resources/)

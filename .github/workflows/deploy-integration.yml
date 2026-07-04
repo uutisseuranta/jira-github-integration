@@ -1,0 +1,56 @@
+name: Deploy Integration Workflows
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/jira-webhook-relay.yml
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Deploy to Target Repositories
+        env:
+          ORG_PAT: ${{ secrets.ORG_PAT }}
+        run: |
+          TARGET_REPOS=(
+            "uutisseuranta.github.io"
+            "patterns"
+            "bq-activitystreams"
+            "skills"
+          )
+          
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          for REPO in "${TARGET_REPOS[@]}"; do
+            echo "Deploying to uutisseuranta/$REPO..."
+            
+            # Clone target repo
+            git clone "https://x-access-token:$ORG_PAT@github.com/uutisseuranta/$REPO.git" "$REPO-dir"
+            
+            # Ensure target directory exists
+            mkdir -p "$REPO-dir/.github/workflows"
+            
+            # Copy relay file
+            cp .github/workflows/jira-webhook-relay.yml "$REPO-dir/.github/workflows/jira-webhook-relay.yml"
+            
+            # Commit and push if changed
+            cd "$REPO-dir"
+            if [ -n "$(git status --porcelain)" ]; then
+              git add .github/workflows/jira-webhook-relay.yml
+              git commit -m "chore(ci): deploy updated jira-webhook-relay.yml from central repo"
+              git push origin HEAD
+              echo "Changes pushed to uutisseuranta/$REPO."
+            else
+              echo "No changes needed for uutisseuranta/$REPO."
+            fi
+            cd ..
+            rm -rf "$REPO-dir"
+          done
