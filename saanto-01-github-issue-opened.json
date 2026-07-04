@@ -42,7 +42,7 @@
         "project": "US",
         "issuetype": "Story",
         "fields": {
-          "summary": "[GitHub] {{webhookData.issue.title}}",
+          "summary": "Git: {{webhookData.issue.title}}",
           "description": "{{webhookData.issue.body}}",
           "customfield_10071": "{{webhookData.repository.name}}",
           "customfield_10072": "{{webhookData.issue.number}}",

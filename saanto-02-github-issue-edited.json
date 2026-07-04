@@ -33,7 +33,7 @@
           {
             "first": "{{webhookData.issue.title}}",
             "operator": "NOT_STARTS_WITH",
-            "second": "[Jira]"
+            "second": "Jira:"
           }
         ],
         "operator": "AND"
@@ -69,7 +69,7 @@
       "value": {
         "issueKey": "{{lookupIssues.first.key}}",
         "fields": {
-          "summary": "[GitHub] {{webhookData.issue.title}}",
+          "summary": "Git: {{webhookData.issue.title}}",
           "description": "{{webhookData.issue.body}}"
         }
       }

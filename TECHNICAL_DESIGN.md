@@ -97,7 +97,7 @@ Custom kenttien **display nimet** varmistettu suoraan Jira Cloud -instanssista
 
 | # | Kenttä | GitHub-vastine | Jira-vastine | Auktoriteetti | GitHub → Jira | Jira → GitHub | Konfliktiresoluutio |
 |---|---|---|---|---|---|---|---|
-| 1 | Otsikko | `title` | `summary` | Molemmat | ✅ etuliite `[GitHub]` lisätään Jiraan | ✅ etuliite `[Jira]` lisätään GitHubiin; `[GitHub]`-alkuiset skippataan | Etuliite estää silmukan; molempiin suuntiin |
+| 1 | Otsikko | `title` | `summary` | Molemmat | ✅ etuliite `Git:` lisätään Jiraan | ✅ etuliite `Jira:` lisätään GitHubiin; `Git:`-alkuiset skippataan | Etuliite estää silmukan; molempiin suuntiin |
 | 2 | Kuvaus | `body` (Markdown) | `description` (plain text) | GitHub | ✅ | ✅ | GitHub voittaa; Markdown säilyy plain textinä Jirassa |
 | 3 | Tila | `state` (open/closed) | `status` (workflow) | Jira | ✅ open→To Do, closed→Done | ✅ Done→close, muut→open+label | Jira-status on master |
 | 4 | Labelit | `labels[]` | `labels[]` | GitHub | ✅ luo uudet Jiraan | ✅ unioni molempiin | Ei ylikirjoiteta; lisätään puuttuvat |
@@ -146,24 +146,24 @@ TRIGGER  →  [CONDITIONS]  →  ACTIONS
 
 Silmukkaesto perustuu **etuliitelogiikkaan** — sama periaate koskee sekä kommentteja että otsikkosynkronointia:
 
-- Automaatio lisää etuliitteen **`[GitHub]`** kaikkiin arvoihin, jotka se kirjoittaa Jiraan (kommentit, summary).
-- Automaatio lisää etuliitteen **`[Jira]`** kaikkiin arvoihin, jotka se kirjoittaa GitHubiin (kommentit, title).
-- Jokainen flow tarkistaa saapuvan arvon ensin: jos se **alkaa** `[GitHub]` tai `[Jira]`, flow **skippataan** — arvo on automaation itsensä tuottama, ei käyttäjän muutos.
+- Kommentit: Automaatio lisää etuliitteen **`[GitHub]`** tai **`[Jira]`** kommentin alkuun. Jos kommentti alkaa näillä, se ohitetaan silmukan välttämiseksi.
+- Otsikot: Automaatio käyttää lyhyitä etuliitteitä **`Git:`** ja **`Jira:`** otsikon/summaryn alussa (noudattaen `L-002`-päätöstä).
+- Jokainen flow tarkistaa saapuvan arvon ensin: jos se alkaa näillä etuliitteillä, flow **skippataan** — arvo on automaation itsensä tuottama, ei käyttäjän muutos.
 
 #### Käytännön esimerkki — otsikko
 
 ```
 Käyttäjä muuttaa GitHub-issuen titlen: "Uusi otsikko"
-  → GitHub → Jira (Sääntö 2/13): kirjoittaa Jiraan "[GitHub] Uusi otsikko"
+  → GitHub → Jira (Sääntö 2): kirjoittaa Jiraan "Git: Uusi otsikko"
 
 Jira havaitsee summary-muutoksen:
-  → Jira → GitHub (Sääntö 13): tarkistaa → alkaa "[GitHub]" → SKIP
+  → Jira → GitHub (Sääntö 13): tarkistaa → alkaa "Git:" → SKIP
 
 Käyttäjä muuttaa Jiran summaryn: "Korjattu otsikko"
-  → Jira → GitHub (Sääntö 13): kirjoittaa GitHubiin "[Jira] Korjattu otsikko"
+  → Jira → GitHub (Sääntö 13): kirjoittaa GitHubiin "Jira: Korjattu otsikko"
 
 GitHub havaitsee title-muutoksen:
-  → GitHub → Jira (Sääntö 2/13): tarkistaa → alkaa "[Jira]" → SKIP
+  → GitHub → Jira (Sääntö 2): tarkistaa → alkaa "Jira:" → SKIP
 ```
 
 #### Käytännön esimerkki — kommentti
@@ -221,13 +221,13 @@ Condition: {{smart values}} condition
 |--------|------|
 | Space | `Uutisseuranta (US)` |
 | Work item type | `Story` |
-| Summary | `[GitHub] {{webhookData.issue.title}}` |
+| Summary | `Git: {{webhookData.issue.title}}` |
 | Description | `{{webhookData.issue.body}}` |
 | `customfield_10071` | `{{webhookData.repository.name}}` |
 | `customfield_10072` | `{{webhookData.issue.number}}` |
 | `customfield_10073` | `{{webhookData.issue.html_url}}` |
 
-> **Huom:** Summary kirjoitetaan aina etuliitteellä `[GitHub]` — tämä estää Jira→GitHub-silmukan Sääntö 13:ssa.
+> **Huom:** Summary kirjoitetaan aina etuliitteellä `Git:` — tämä estää Jira→GitHub-silmukan Sääntö 13:ssa.
 
 ---
 
@@ -237,7 +237,7 @@ Condition: {{smart values}} condition
 
 📄 [saanto-02-github-issue-edited.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-02-github-issue-edited.json)
 
-> **Huom:** Summary kirjoitetaan etuliitteellä `[GitHub]`. Ensin tarkistetaan, ettei title alkanut `[Jira]` — se tarkoittaisi, että GitHubin muutos on automaation itsensä tekemä (Sääntö 13 kirjoitti sen), ja silloin Jiraa ei päivitetä.
+> **Huom:** Summary kirjoitetaan etuliitteellä `Git:`. Ensin tarkistetaan, ettei title alkanut `Jira:` — se tarkoittaisi, että GitHubin muutos on automaation itsensä tekemä (Sääntö 13 kirjoitti sen), ja silloin Jiraa ei päivitetä.
 
 ---
 
@@ -353,8 +353,8 @@ Content-Type: application/json
 
 📄 [saanto-13-jira-summary-changed.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-13-jira-summary-changed.json)
 
-> **Silmukkaesto:** Jos summary alkaa `[GitHub]`, se on Sääntö 2:n kirjoittama — ei käyttäjän muutos, joten flow skippataan.  
-> GitHub-päässä Sääntö 2 tarkistaa vastaavasti, ettei title alkanut `[Jira]` ennen kuin kirjoittaa Jiraan.
+> **Silmukkaesto:** Jos summary alkaa `Git:`, se on Sääntö 2:n kirjoittama — ei käyttäjän muutos, joten flow skippataan.  
+> GitHub-päässä Sääntö 2 tarkistaa vastaavasti, ettei title alkanut `Jira:` ennen kuin kirjoittaa Jiraan.
 
 ---
 
