@@ -13,8 +13,10 @@ Ennen kuin mikään toimii, lisää nämä **GitHub repository secretseihin** (`
 | `JIRA_API_TOKEN` | Jira API Token ([luo täällä](https://id.atlassian.com/manage-profile/security/api-tokens)) | `ATATxxxx...` |
 | `GH_PAT` | GitHub Personal Access Token (scope: `repo`) | `ghp_xxxx...` |
 | `GITHUB_WEBHOOK_SECRET` | Webhook-salaisuus (itsekeksitty merkkijono) | `satunnainenmerkkijono123` |
+| `JIRA_WEBHOOK_URL` | Jira Automation Incoming Webhook URL | `https://api-private.atlassian.com/...` |
+| `JIRA_WEBHOOK_TOKEN` | Jira Automation Webhook Secret Token | `satunnainenavainabc123...` |
 
-> **HUOM:** Jos `JIRA_BASE_URL` puuttuu, Actions-workflow epäonnistuu välittömästi.
+> **HUOM:** Jos `JIRA_BASE_URL` tai `JIRA_WEBHOOK_URL` puuttuu, Actions-workflow tai rele-työkulku epäonnistuu/hyppää yli välittömästi. Nykyiset Jira Cloud -automaatiot vaativat tietoturvasyistä `JIRA_WEBHOOK_TOKEN` -salaisuuden `HTTP 400 (Missing token)` -virheiden välttämiseksi.
 
 ## Rakenne
 
