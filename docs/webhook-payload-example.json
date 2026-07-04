@@ -8,8 +8,6 @@
     "state": "open",
     "state_reason": null,
     "labels": [{"name": "bug"}],
-    "assignees": [{"login": "username"}],
-    "assignee": {"login": "username"},
     "milestone": {
       "title": "v1.0",
       "due_on": "2026-08-01T00:00:00Z",

@@ -3,7 +3,7 @@ name: Jira Webhook Relay
 on:
   issues:
     types: [opened, edited, closed, reopened, labeled, unlabeled,
-            assigned, unassigned, milestoned, demilestoned]
+            milestoned, demilestoned]
   issue_comment:
     types: [created]
 
