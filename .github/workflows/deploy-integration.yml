@@ -18,6 +18,9 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v4
 
+      - name: Run Rules Validation Tests
+        run: python3 test-rules.py
+
       - name: Deploy to Target Repositories
         env:
           ORG_PAT: ${{ secrets.ORG_PAT }}
