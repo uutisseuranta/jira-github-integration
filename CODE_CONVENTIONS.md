@@ -14,13 +14,14 @@
 
 **Kaikki tiedostot sijaitsevat repositorion juuressa. Alikansioita ei käytetä.**
 
-Poikkeus: `.github/`-hakemisto on sallittu GitHub-spesifiselle konfiguraatiolle (Actions-workflowt, issue-templatet, jne.).
+Poikkeus: `.github/`-hakemisto on sallittu **GitHubin omaa infrastruktuuria** varten (Actions-workflowt, issue-templatet, Dependabot-konfiguraatio jne.). `.github/` ei ole tarkoitettu repon omille tiedostoille — sinne ei sijoiteta dokumentaatiota, skriptejä, konfiguraatioita eikä muita projektin tiedostoja.
 
 ```
 repo/
-├── .github/          ← ainoa sallittu alikansio
+├── .github/          ← VAIN GitHub-infrastruktuuri (Actions, issue-templatet)
 │   └── workflows/
 │       └── *.yml
+├── MML-SKILL.md      ← repon oma tiedosto → juureen, ei .github/:iin
 ├── TIEDOSTO.ext      ← kaikki muu suoraan juuressa
 ├── TOINEN.ext
 └── ...
