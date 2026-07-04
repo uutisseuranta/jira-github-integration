@@ -193,6 +193,8 @@ GitHub havaitsee uuden kommentin:
 
 **Tila:** VALMIS — testattu, work item US-7 luotu onnistuneesti 3.7.2026
 
+📄 [saanto-01-github-issue-opened.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-01-github-issue-opened.json)
+
 #### Trigger
 
 | Asetus | Arvo |
@@ -233,26 +235,7 @@ Condition: {{smart values}} condition
 
 **Tila:** JSON v2 valmis, testaamatta
 
-```
-Trigger: Incoming webhook
-  → webhookData.action == "edited"
-
-Condition: {{smart values}} condition
-  → {{webhookData.changes.title}} OR {{webhookData.changes.body}} exists
-
-Action: Lookup work items
-  → JQL: project = US AND cf[10072] = {{webhookData.issue.number}}
-         AND cf[10071] = "{{webhookData.repository.name}}"
-
-Condition: {{lookupIssues.size}} greater than 0
-
-Condition (silmukkaesto — title): {{webhookData.issue.title}} does not start with "[Jira]"
-
-Action: Edit work item
-  → Work item: {{lookupIssues.first.key}}
-  → Summary:     [GitHub] {{webhookData.issue.title}}
-  → Description: {{webhookData.issue.body}}
-```
+📄 [saanto-02-github-issue-edited.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-02-github-issue-edited.json)
 
 > **Huom:** Summary kirjoitetaan etuliitteellä `[GitHub]`. Ensin tarkistetaan, ettei title alkanut `[Jira]` — se tarkoittaisi, että GitHubin muutos on automaation itsensä tekemä (Sääntö 13 kirjoitti sen), ja silloin Jiraa ei päivitetä.
 
@@ -262,25 +245,7 @@ Action: Edit work item
 
 **Tila:** JSON v2 valmis, testaamatta
 
-```
-Trigger: Incoming webhook
-  → webhookData.action == "closed"
-
-Action: Lookup work items
-  → JQL: project = US AND cf[10072] = {{webhookData.issue.number}}
-         AND cf[10071] = "{{webhookData.repository.name}}"
-
-Condition: {{lookupIssues.size}} greater than 0
-
-Action: Transition work item
-  → Work item: {{lookupIssues.first.key}}
-  → To status: Done
-
-Action: Edit work item (resolution)
-  → IF {{webhookData.issue.state_reason}} == "completed"   → "Fixed"
-  → IF {{webhookData.issue.state_reason}} == "not_planned" → "Won't Do"
-  → IF {{webhookData.issue.state_reason}} == "duplicate"   → "Duplicate"
-```
+📄 [saanto-03-github-issue-closed.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-03-github-issue-closed.json)
 
 > Transition-nimet täsmättävä **Project Settings → Workflows**.  
 > US-statukset: `To Do` (10000), `In Progress` (10001), `Done` (10002).
@@ -291,22 +256,7 @@ Action: Edit work item (resolution)
 
 **Tila:** JSON v2 valmis, testaamatta
 
-```
-Trigger: Incoming webhook
-  → webhookData.action == "reopened"
-
-Action: Lookup work items
-  → JQL: project = US AND cf[10072] = {{webhookData.issue.number}}
-         AND cf[10071] = "{{webhookData.repository.name}}"
-
-Condition: {{lookupIssues.size}} greater than 0
-
-Action: Edit work item  (tyhjennä resolution ENNEN transitiota)
-  → Field: Resolution → (tyhjä)
-
-Action: Transition work item
-  → To status: To Do
-```
+📄 [saanto-04-github-issue-reopened.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-04-github-issue-reopened.json)
 
 ---
 
@@ -314,29 +264,7 @@ Action: Transition work item
 
 **Tila:** JSON v2 valmis, testattava
 
-```
-Trigger: Incoming webhook
-  → webhookData.action == "labeled" TAI "unlabeled"
-
-Action: Lookup work items
-  → JQL: project = US AND cf[10072] = {{webhookData.issue.number}}
-         AND cf[10071] = "{{webhookData.repository.name}}"
-
-Condition: {{lookupIssues.size}} greater than 0
-
-Action: Edit work item
-  → Field: Labels
-  → IF action == "labeled":   Operation: Add,    Value: {{webhookData.label.name}}
-  → IF action == "unlabeled": Operation: Remove, Value: {{webhookData.label.name}}
-
-IF {{webhookData.label.name}} alkaa "priority:":
-  Action: Edit work item
-    → Field: Priority
-    → priority:high    → High
-    → priority:medium  → Medium
-    → priority:low     → Low
-    → priority:lowest  → Lowest
-```
+📄 [saanto-05-github-issue-labeled.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-05-github-issue-labeled.json)
 
 ---
 
@@ -350,23 +278,7 @@ IF {{webhookData.label.name}} alkaa "priority:":
 
 **Tila:** Suunniteltu, ei toteutettu
 
-```
-Trigger: Incoming webhook
-  → webhookData.action == "milestoned" TAI "demilestoned"
-
-Action: Lookup work items
-  → JQL: project = US AND cf[10072] = {{webhookData.issue.number}}
-         AND cf[10071] = "{{webhookData.repository.name}}"
-
-Action: Edit work item
-  → fixVersions: {{webhookData.issue.milestone.title}}
-  Jos versiota ei ole: HTTP POST /rest/api/3/version
-    body: {
-      "name":        "{{webhookData.issue.milestone.title}}",
-      "releaseDate": "{{webhookData.issue.milestone.due_on}}",
-      "projectId":   "<US-projektin numeerinen ID — haettava GET /rest/api/3/project/US>"
-    }
-```
+📄 [saanto-07-github-issue-milestoned.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-07-github-issue-milestoned.json)
 
 > **Huom:** `projectId` on numeerinen (ei projektiavain `US`). Hae kerran:  
 > `GET https://uutisseuranta.atlassian.net/rest/api/3/project/US` → kenttä `id`.
@@ -377,21 +289,7 @@ Action: Edit work item
 
 **Tila:** JSON v2 valmis, testaamatta
 
-```
-Trigger: Incoming webhook
-  → webhookData.action == "created"  (issue_comment event)
-
-Action: Lookup work items
-  → JQL: project = US AND cf[10072] = {{webhookData.issue.number}}
-         AND cf[10071] = "{{webhookData.repository.name}}"
-
-Condition: {{lookupIssues.size}} greater than 0
-
-Condition: {{webhookData.comment.body}} does not start with "[Jira]"
-
-Action: Comment on work item
-  → "[GitHub] @{{webhookData.comment.user.login}}: {{webhookData.comment.body}}"
-```
+📄 [saanto-08-github-comment-created.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-08-github-comment-created.json)
 
 ---
 
@@ -417,22 +315,7 @@ Content-Type: application/json
 
 **Tila:** Suunniteltu (TODO)
 
-```
-Trigger: Work item transitioned
-
-Condition: customfield_10072 is not empty
-
-Action: Send web request
-  → Method: PATCH
-  → URL: [URL-pohja]
-  → Body (jos Done):  {"state": "closed", "state_reason": "completed"}
-  → Body (muut):      {"state": "open"}
-
-Action: Send web request  (lisää status-label)
-  → Method: POST
-  → URL: .../labels
-  → Body: {"labels": ["status:{{issue.status.name | toLower}}"]}
-```
+📄 [saanto-09-jira-status-changed.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-09-jira-status-changed.json)
 
 > **Huom:** Label-poistologiikka poistettu (D-006) — katso [issue #3](https://github.com/uutisseuranta/jira-github-integration/issues/3).
 
@@ -448,16 +331,7 @@ Action: Send web request  (lisää status-label)
 
 **Tila:** Suunniteltu (TODO)
 
-```
-Trigger: Field value changed → Field: Priority
-
-Condition: customfield_10072 is not empty
-
-Action: Send web request  (lisää uusi priority-label)
-  → Method: POST
-  → URL: .../labels
-  → Body: {"labels": ["priority:{{issue.priority.name | toLower}}"]}
-```
+📄 [saanto-11-jira-priority-changed.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-11-jira-priority-changed.json)
 
 > **Huom:** Label-poistologiikka poistettu (D-006) — katso [issue #3](https://github.com/uutisseuranta/jira-github-integration/issues/3).
 
@@ -467,16 +341,7 @@ Action: Send web request  (lisää uusi priority-label)
 
 **Tila:** Suunniteltu (TODO)
 
-```
-Trigger: Field value changed → Field: Sprint
-
-Condition: customfield_10072 is not empty
-
-Action: Send web request  (lisää sprint-label)
-  → Method: POST
-  → URL: .../labels
-  → Body: {"labels": ["sprint:{{issue.sprint.name}}"]}
-```
+📄 [saanto-12-jira-sprint-changed.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-12-jira-sprint-changed.json)
 
 > **Huom:** Label-poistologiikka poistettu (D-006) — katso [issue #3](https://github.com/uutisseuranta/jira-github-integration/issues/3).
 
@@ -486,18 +351,7 @@ Action: Send web request  (lisää sprint-label)
 
 **Tila:** Suunniteltu (TODO)
 
-```
-Trigger: Field value changed → Field: Summary
-
-Condition: customfield_10072 is not empty
-
-Condition (silmukkaesto): {{issue.summary}} does not start with "[GitHub]"
-
-Action: Send web request
-  → Method: PATCH
-  → URL: [URL-pohja]
-  → Body: {"title": "[Jira] {{issue.summary}}"}
-```
+📄 [saanto-13-jira-summary-changed.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-13-jira-summary-changed.json)
 
 > **Silmukkaesto:** Jos summary alkaa `[GitHub]`, se on Sääntö 2:n kirjoittama — ei käyttäjän muutos, joten flow skippataan.  
 > GitHub-päässä Sääntö 2 tarkistaa vastaavasti, ettei title alkanut `[Jira]` ennen kuin kirjoittaa Jiraan.
@@ -508,18 +362,7 @@ Action: Send web request
 
 **Tila:** Suunniteltu (TODO)
 
-```
-Trigger: Comment added
-
-Condition: customfield_10072 is not empty
-
-Condition: {{comment.body}} does not start with "[GitHub]"
-
-Action: Send web request
-  → Method: POST
-  → URL: .../comments
-  → Body: {"body": "[Jira] {{comment.author.displayName}}: {{comment.body}}"}
-```
+📄 [saanto-14-jira-comment-added.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-14-jira-comment-added.json)
 
 ---
 
@@ -527,21 +370,7 @@ Action: Send web request
 
 **Tila:** Suunniteltu (TODO)
 
-```
-Trigger: Field value changed → Field: Fix versions
-
-Condition: customfield_10072 is not empty
-
-Action: Send web request  (hae milestone-numero)
-  → Method: GET
-  → URL: https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/milestones
-
-Action: Send web request  (päivitä tai luo)
-  → Jos milestone löytyy nimellä {{issue.fixVersions[0].name}}:
-      Method: PATCH, body: {"milestone": <numero>}
-  → Jos ei löydy:
-      Method: POST .../milestones, body: {"title": "{{issue.fixVersions[0].name}}"}
-```
+📄 [saanto-15-jira-fixversions-changed.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-15-jira-fixversions-changed.json)
 
 ---
 
