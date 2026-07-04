@@ -39,6 +39,33 @@ Ennen kuin mikään toimii, lisää nämä **GitHub repository secretseihin** (`
 ## Migraatio (vanhat issuet)
 
 Käynnistä `Actions → Migrate GitHub Issues to Jira → Run workflow`.
-Sama workflow toimii seuraavaan projektiin vaihtamalla `project_key`-parametri.
+Sama workflow toimii seuraavaan projektiin vaihtamalla `project_key`-parametri. Migraatioskripti ([`migrate-history.py`](migrate-history.py)) lisää automaattisesti `Git:`-etuliitteen tiketteihin.
 
-Lisätietoja: [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md)
+---
+
+## 🛠️ Toteutushistoria ja arkkitehtuuriratkaisut
+
+Tämä repositorio toimii uutisseuranta-organisaation keskitettynä integraatiohallintana. Kehityskaaren aikana toteutettiin seuraavat arkkitehtuuriratkaisut:
+
+### 1. Kaksisuuntainen otsikkosynkronointi & silmukkaesto
+*   Otsikkosynkronointi on täysin kaksisuuntainen ja perustuu etuliitteisiin **`Git:`** ja **`Jira:`** (ilman hakasulkeita).
+*   Alkuperäinen luontipaikka määrittää tiketin master-järjestelmän: jos tiketti luodaan GitHubissa, se saa Jiraan etuliitteen `Git:`. Jira Automation tunnistaa tämän ja skippaa synkronoinnin takaisin GitHubiin, estäen ikuiset päivityssilmukat ilman viiveitä tai monimutkaista aritmetiikkaa (L-002).
+
+### 2. Automaattinen validointi (Test Coverage 100 %)
+*   Kaikki JSON-muotoiset säännöt (`saanto-*.json`) validoidaan automaattisesti jokaisessa PR- ja CI-ajossa Python-testiohjelmalla [`test-rules.py`](test-rules.py).
+*   Testit tarkistavat JSON-syntaksin, custom-kenttien käytön (`customfield_10071`–`10073`), etuliitteiden oikeellisuuden sekä varmistavat, ettei säännöissä ole kiellettyjä label-poistoja (L-006).
+
+### 3. Keskitetty deployment-automaatio
+*   [**`deploy-integration.yml`**](.github/workflows/deploy-integration.yml) synkronoi ja pushaa `jira-webhook-relay.yml` -välitystiedoston automaattisesti organisaation muihin repositorioihin:
+    *   `uutisseuranta.github.io`
+    *   `patterns`
+    *   `bq-activitystreams`
+    *   `skills`
+    *   `ops` (Uusi valvonta- ja orkestrointirepo)
+*   Tietoturva on varmistettu `insteadOf` URL-uudelleenkirjoituksella, jotta tokenit eivät pääse vuotamaan Actions-virhelokeihin.
+
+### 4. Tietoturvapolitiikka ja koodivastuut (Issue #16)
+*   **Haaransuojaukset (Branch Protection)**: `main`-haara on suojattu kaikissa julkisissa repoissa. Se vaatii vähintään 1 hyväksytyn katselmoinnin ja Code Owner -hyväksynnän.
+*   **CODEOWNERS**: Koodivastuut on määritelty ja jaettu repositorion juuressa `@jaakkokorhonen` vastuulle.
+
+Lisätietoja: [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md) ja [DECISION_LOG.csv](DECISION_LOG.csv)
