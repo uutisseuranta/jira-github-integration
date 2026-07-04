@@ -18,12 +18,12 @@ Poikkeus: `.github/`-hakemisto on sallittu **GitHubin omaa infrastruktuuria** va
 
 ```
 repo/
-├── .github/          ← VAIN GitHub-infrastruktuuri (Actions, issue-templatet)
+├── .github/               ← VAIN GitHub-infrastruktuuri (Actions, issue-templatet)
 │   └── workflows/
 │       └── *.yml
-├── MML-SKILL.md      ← repon oma tiedosto → juureen, ei .github/:iin
-├── TIEDOSTO.ext      ← kaikki muu suoraan juuressa
-├── TOINEN.ext
+├── skill-(käyttötarkoitus).yml  ← MML-skill-konfiguraatiot, juuressa
+├── SOPIMUSDOKUMENTTI.md   ← SCREAMING_SNAKE_CASE-dokumentit juuressa
+├── tiedosto.ext           ← muu kebab-case-lähdekoodisto juuressa
 └── ...
 ```
 
@@ -49,9 +49,28 @@ USER_PATHS.md
 
 Perustelu (D-002, uutisseuranta.github.io): Erottaa sopimukset ja normatiiviset dokumentit ops-tiedostoista ja lähdekoodista. Yhtenäinen nimeäminen kaikkien repojen välillä.
 
+### Skill-tiedostot — `skill-(käyttötarkoitus).yml`
+
+MML-skill-konfiguraatiot nimetään muodossa `skill-(käyttötarkoitus).yml` ja sijoitetaan **repositorion juureen**.
+
+```
+skill-decision-log.yml
+skill-jira-sync.yml
+skill-label-manager.yml
+```
+
+Nimeämissäännöt:
+- Prefix `skill-` on aina läsnä — erottaa skill-tiedostot muusta konfiguraatiosta
+- Käyttötarkoitusosa: `lowercase`, sanojen välissä väliviiva (`kebab-case`)
+- Vain pienet kirjaimet ja väliviivoilla — ei alaviivoja, välilyöntejä eikä erikoismerkkejä
+- Enintään 64 merkkiä (koko tiedostonimi)
+- Formaatti: `.yml` (ei `.yaml`)
+
+Perustelu: Claudelint-spesifikaation skill-nimikäytäntö (lowercase-with-hyphens, max 64 merkkiä) sovellettuna tähän projektiin. `skill-`-prefix tekee tiedostot tunnistettaviksi hakemistolistauksessa ilman hakemistorakennetta. Skillit ovat repokohtaisia YAML-konfiguraatioita, eivät sopimusdokumentteja — siksi ne eivät käytä `SCREAMING_SNAKE_CASE`-muotoa.
+
 ### Lähdekooditiedostot — `kebab-case`
 
-Kaikki muut tiedostot (HTML, CSS, JS, YAML, JSON, Bash): `kebab-case`.
+Kaikki muut tiedostot (HTML, CSS, JS, JSON, Bash): `kebab-case`.
 
 ```
 index.html
@@ -177,7 +196,7 @@ font-size: clamp(0.75rem, ...);
 # Käyttö: ./live-smoke-test.sh https://uutisseuranta.fi
 ```
 
-### YAML (GitHub Actions)
+### YAML (GitHub Actions & skill-tiedostot)
 
 ```yaml
 # Yksiriviset: #
