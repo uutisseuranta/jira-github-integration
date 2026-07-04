@@ -1,0 +1,29 @@
+{
+  "action": "opened",
+  "issue": {
+    "number": 42,
+    "title": "Fix login bug",
+    "body": "Description...",
+    "html_url": "https://github.com/uutisseuranta/uutisseuranta.github.io/issues/42",
+    "state": "open",
+    "state_reason": null,
+    "labels": [{"name": "bug"}],
+    "milestone": {
+      "title": "v1.0",
+      "due_on": "2026-08-01T00:00:00Z",
+      "number": 1
+    },
+    "user": {"login": "username"}
+  },
+  "comment": {
+    "id": 123456,
+    "body": "Comment text",
+    "user": {"login": "commenter"}
+  },
+  "label": {"name": "bug"},
+  "repository": {
+    "name": "uutisseuranta.github.io",
+    "full_name": "uutisseuranta/uutisseuranta.github.io"
+  },
+  "sender": {"login": "triggering-user"}
+}
