@@ -30,6 +30,7 @@ jobs:
             "patterns"
             "bq-activitystreams"
             "skills"
+            "ops"
           )
           
           # Määritetään turvallinen URL-uudelleenkirjoitus PAT-tokenille, jotta token ei vuoda virhelokeihin kloonattaessa
