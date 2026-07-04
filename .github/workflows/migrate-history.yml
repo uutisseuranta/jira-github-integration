@@ -1,46 +1,47 @@
-name: Migrate Jira Issue History
+name: Migrate GitHub Issues to Jira
 
 on:
   workflow_dispatch:
     inputs:
       project_key:
-        description: 'Jira project key (e.g. US)'
+        description: 'Jira project key (esim. US, PROJ, NEWS)'
         required: true
         default: 'US'
+      repo:
+        description: 'GitHub repo jonka issuet migroidaan (esim. uutisseuranta.github.io)'
+        required: true
+        default: 'uutisseuranta.github.io'
       dry_run:
-        description: 'Dry run (ei webhook-kutsuja, vain loki)'
+        description: 'Dry run - ei luo Jira-issueja, vain tulostaa mitä luotaisiin'
         required: false
         default: 'false'
         type: choice
-        options: ['false', 'true']
-      max_issues:
-        description: 'Max issues (0 = kaikki)'
-        required: false
-        default: '0'
+        options:
+          - 'true'
+          - 'false'
 
 jobs:
   migrate:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install requests
-      - name: Run migration script
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run migration
         env:
-          JIRA_BASE_URL:          ${{ secrets.JIRA_BASE_URL }}
-          JIRA_EMAIL:             ${{ secrets.JIRA_EMAIL }}
-          JIRA_API_TOKEN:         ${{ secrets.JIRA_API_TOKEN }}
-          AUTOMATION_WEBHOOK_URL: ${{ secrets.AUTOMATION_WEBHOOK_URL }}
-          PROJECT_KEY:            ${{ inputs.project_key }}
-          DRY_RUN:                ${{ inputs.dry_run }}
-          MAX_ISSUES:             ${{ inputs.max_issues }}
-        run: python scripts/migrate_history.py
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: migration-log-${{ inputs.project_key }}-${{ github.run_id }}
-          path: migration_log.jsonl
-          retention-days: 30
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_PROJECT_KEY: ${{ inputs.project_key }}
+          GITHUB_REPO: ${{ inputs.repo }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: python scripts/migrate-history.py
