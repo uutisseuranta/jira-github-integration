@@ -622,10 +622,10 @@ curl -s -X POST \
 | 3 | Tallenna GitHub PAT + Jira Automation webhook URL secreteihin | ✅ VALMIS |
 | 4 | Luo relay-workflow (`jira-webhook-relay.yml`) | ✅ VALMIS |
 | 5 | Sääntö 1: GitHub issue opened → Luo Jira work item | ✅ VALMIS (testattu, US-7) |
-| 6 | Säännöt 2–8: Testaa ja ota käyttöön GitHub → Jira | 🔄 Käynnissä (issue #7) |
-| 7 | Säännöt 9–15: Toteuta Jira → GitHub | 📋 Suunniteltu (issue #8) |
-| 8 | Lisää JIRA_BASE_URL secret + aja historia-migraatio | 📋 Suunniteltu (issue #9) |
-| 9 | Backfill-validointi | 📋 Suunniteltu (issue #10) |
+| 6 | Säännöt 2–8: Testaa ja ota käyttöön GitHub → Jira | ✅ VALMIS ([Issue #7](https://github.com/uutisseuranta/jira-github-integration/issues/7), [PR #17](https://github.com/uutisseuranta/jira-github-integration/pull/17)) |
+| 7 | Säännöt 9–15: Toteuta Jira → GitHub | ✅ VALMIS ([Issue #8](https://github.com/uutisseuranta/jira-github-integration/issues/8), [PR #17](https://github.com/uutisseuranta/jira-github-integration/pull/17)) |
+| 8 | Lisää JIRA_BASE_URL secret + aja historia-migraatio | ✅ VALMIS ([Issue #9](https://github.com/uutisseuranta/jira-github-integration/issues/9), suoritettu [`migrate-history.py`](https://github.com/uutisseuranta/jira-github-integration/blob/main/migrate-history.py)-skriptillä) |
+| 9 | Backfill-validointi ja testiautomaatio | ✅ VALMIS ([Issue #10](https://github.com/uutisseuranta/jira-github-integration/issues/10), validointi kirjoitettu [`test-rules.py`](https://github.com/uutisseuranta/jira-github-integration/blob/main/test-rules.py)-testitiedostoon) |
 
 ---
 
@@ -637,7 +637,7 @@ Organisaation laajuiset tietoturva- ja laadunvarmistussäännöt päähaaran (`m
 *   **Require a pull request before merging**: Kaikki muutokset päähaaraan on tehtävä Pull Requestin kautta. Suora push päähaaraan on kielletty.
 *   **Require approvals**: Jokaiseen PR:ään vaaditaan vähintään yksi (1) hyväksytty katselmointi (approving review) ennen mergeämistä.
 *   **Require review from Code Owners**: Jos PR muuttaa tiedostoja, joille on määritetty omistaja `CODEOWNERS`-tiedostossa, mergeäminen vaatii kyseisen omistajan hyväksynnän.
-*   *Rajoitus*: Yksityisessä `skills`-repositoriossa branch protection ei ole aktiivinen GitHub Free -lisenssirajoitusten takia.
+*   *Rajoitus*: Yksityisissä `skills`- ja `ops`-repositorioissa branch protection ei ole aktiivinen GitHub Free -lisenssirajoitusten takia. Sääntöjä seurataan näissä repositorioissa sosiaalisen sopimuksen kautta.
 
 ### 2. Pakolliset status-tarkistukset (Required status checks) per repositorio
 Ennen PR:n hyväksymistä seuraavien CI-tarkistusten on mentävä onnistuneesti läpi:
