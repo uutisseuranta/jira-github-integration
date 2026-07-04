@@ -60,7 +60,7 @@ def create_jira_issue(gh_issue):
     payload = {
         "fields": {
             "project": {"key": JIRA_PROJECT_KEY},
-            "summary": gh_issue["title"],
+            "summary": f"Git: {gh_issue['title']}",
             "description": {
                 "type": "doc",
                 "version": 1,
