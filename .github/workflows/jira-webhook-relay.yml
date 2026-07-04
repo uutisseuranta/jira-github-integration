@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send to Jira Automation
+        if: ${{ secrets.JIRA_WEBHOOK_URL != '' }}
         env:
           JIRA_WEBHOOK_TOKEN: ${{ secrets.JIRA_WEBHOOK_TOKEN }}
           JIRA_WEBHOOK_URL: ${{ secrets.JIRA_WEBHOOK_URL }}
