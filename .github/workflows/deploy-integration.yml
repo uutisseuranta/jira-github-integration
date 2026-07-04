@@ -38,21 +38,15 @@ jobs:
           for REPO in "${TARGET_REPOS[@]}"; do
             echo "Deploying to uutisseuranta/$REPO..."
             
-            # Kloonataan kohderepo käyttäen standardia HTTPS-URLia (git config uudelleenkirjoittaa tämän turvallisesti tokenilla)
             git clone "https://github.com/uutisseuranta/$REPO.git" "$REPO-dir"
-            
-            # Varmistetaan, että .github/workflows hakemisto on olemassa
             mkdir -p "$REPO-dir/.github/workflows"
-            
-            # Kopioidaan uusi relee-workflow kohderepoon
             cp .github/workflows/jira-webhook-relay.yml "$REPO-dir/.github/workflows/jira-webhook-relay.yml"
             
-            # Commitoidaan ja pushataan muutokset vain jos tiedosto muuttui
             cd "$REPO-dir"
             if [ -n "$(git status --porcelain)" ]; then
               git add .github/workflows/jira-webhook-relay.yml
               git commit -m "chore(ci): deploy updated jira-webhook-relay.yml from central repo"
-              # Pushataan ekspliittisesti kohderepon main-haaraan
+              # Pushataan ekspliittisesti kohdehaaraan main, jotta vältytään riippuvuudelta kohderepon oletushaarasta
               git push origin HEAD:main
               echo "Changes pushed to uutisseuranta/$REPO."
             else
