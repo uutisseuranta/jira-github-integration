@@ -629,6 +629,35 @@ curl -s -X POST \
 
 ---
 
+## Branch protection & CI policy
+
+Organisaation laajuiset tietoturva- ja laadunvarmistussäännöt päähaaran (`main`) suojaamiseksi:
+
+### 1. Haaransuojauksen yleiset säännöt (Branch Protection)
+*   **Require a pull request before merging**: Kaikki muutokset päähaaraan on tehtävä Pull Requestin kautta. Suora push päähaaraan on kielletty.
+*   **Require approvals**: Jokaiseen PR:ään vaaditaan vähintään yksi (1) hyväksytty katselmointi (approving review) ennen mergeämistä.
+*   **Require review from Code Owners**: Jos PR muuttaa tiedostoja, joille on määritetty omistaja `CODEOWNERS`-tiedostossa, mergeäminen vaatii kyseisen omistajan hyväksynnän.
+*   *Rajoitus*: Yksityisessä `skills`-repositoriossa branch protection ei ole aktiivinen GitHub Free -lisenssirajoitusten takia.
+
+### 2. Pakolliset status-tarkistukset (Required status checks) per repositorio
+Ennen PR:n hyväksymistä seuraavien CI-tarkistusten on mentävä onnistuneesti läpi:
+*   **patterns**:
+    *   Yksikkötestit (`npm run test`)
+    *   Tyylit ja syntaksi (`Stylelint`, `html-validate`)
+*   **bq-activitystreams**:
+    *   Yksikkötestit ja AS2-sopimuksen yhteensopivuustestit (AS2 compatibility tests)
+    *   DevSecOps-skannaukset (Bandit, Dependabot, Trivy-konttikuva)
+*   **uutisseuranta.github.io**:
+    *   Frontend-testit ja syntaksi (ESLint/TypeScript)
+*   **jira-github-integration**:
+    *   Deployment-työkulun syntaksitarkistus (YAML lint)
+
+### 3. Koodivastuut (CODEOWNERS)
+*   Jokaisessa repositoriossa määritellään `CODEOWNERS`-tiedosto juurikansiossa.
+*   Oletussääntönä kaikelle koodille on `@jaakkokorhonen`, joka vastaa integraation ja infrastruktuurin katselmoinnista.
+
+---
+
 ## Linkit
 
 - [Cloud Automation — resources](https://support.atlassian.com/cloud-automation/resources/)
