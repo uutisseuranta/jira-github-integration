@@ -1,0 +1,25 @@
+name: Jira Webhook Relay
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened, labeled, unlabeled,
+            assigned, unassigned, milestoned, demilestoned]
+  issue_comment:
+    types: [created]
+
+jobs:
+  relay:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send to Jira Automation
+        env:
+          JIRA_WEBHOOK_TOKEN: ${{ secrets.JIRA_WEBHOOK_TOKEN }}
+          JIRA_WEBHOOK_URL: ${{ secrets.JIRA_WEBHOOK_URL }}
+        run: |
+          echo '${{ toJson(github.event) }}' | \
+          curl -s -X POST \
+            "$JIRA_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -H "X-Automation-Webhook-Token: $JIRA_WEBHOOK_TOKEN" \
+            --data-binary @- \
+            -w "\nHTTP %{http_code}\n"
