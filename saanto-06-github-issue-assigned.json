@@ -1,0 +1,66 @@
+{
+  "name": "Sääntö 6: GitHub issue assigned/unassigned → Päivitä assignee",
+  "state": "DISABLED",
+  "canOtherRuleTrigger": false,
+  "notifyOnError": "FIRSTERROR",
+  "_comment": "Tila: Suunniteltu (TODO). RAJOITUS: GitHub login != Jira accountId. Edellyttää user-mapping-taulukkoa jos tunnukset eivät täsmää. Toistaiseksi oletetaan Jira-tunnus == GitHub-login.",
+  "trigger": {
+    "component": "TRIGGER",
+    "type": "jira.trigger.incoming.webhook",
+    "value": {
+      "webhookType": "NO_ISSUES"
+    }
+  },
+  "components": [
+    {
+      "component": "CONDITION",
+      "type": "jira.condition.if",
+      "value": {
+        "conditions": [
+          {
+            "first": "{{webhookData.action}}",
+            "operator": "IN",
+            "second": "assigned,unassigned"
+          }
+        ],
+        "operator": "AND"
+      }
+    },
+    {
+      "component": "ACTION",
+      "type": "jira.issue.lookup",
+      "value": {
+        "query": {
+          "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
+        },
+        "variableName": "lookupIssues"
+      }
+    },
+    {
+      "component": "CONDITION",
+      "type": "jira.condition.if",
+      "value": {
+        "conditions": [
+          {
+            "first": "{{lookupIssues.size}}",
+            "operator": "GREATER_THAN",
+            "second": "0"
+          }
+        ],
+        "operator": "AND"
+      }
+    },
+    {
+      "component": "ACTION",
+      "type": "jira.issue.edit",
+      "value": {
+        "issueKey": "{{lookupIssues.first.key}}",
+        "fields": {
+          "assignee": {
+            "name": "{{#if webhookData.action == 'assigned'}}{{webhookData.issue.assignee.login}}{{else}}{{/if}}"
+          }
+        }
+      }
+    }
+  ]
+}
