@@ -1,5 +1,8 @@
 name: Deploy Integration Workflows
 
+# Työkulku synkronoi jira-webhook-relay.yml -tiedoston organisaation muihin varastoihin.
+# Käynnistyy automaattisesti, kun tiedosto muuttuu main-haarassa, tai manuaalisesti (workflow_dispatch).
+# Manuaalinen käynnistys mahdollistaa kaikkien kohderepojen synkronoinnin pakotetusti sen hetkisellä main-versiolla.
 on:
   push:
     branches:
@@ -26,27 +29,31 @@ jobs:
             "skills"
           )
           
+          # Määritetään turvallinen URL-uudelleenkirjoitus PAT-tokenille, jotta token ei vuoda virhelokeihin kloonattaessa
+          git config --global url."https://x-access-token:${ORG_PAT}@github.com/".insteadOf "https://github.com/"
+          
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
           for REPO in "${TARGET_REPOS[@]}"; do
             echo "Deploying to uutisseuranta/$REPO..."
             
-            # Clone target repo
-            git clone "https://x-access-token:$ORG_PAT@github.com/uutisseuranta/$REPO.git" "$REPO-dir"
+            # Kloonataan kohderepo käyttäen standardia HTTPS-URLia (git config uudelleenkirjoittaa tämän turvallisesti tokenilla)
+            git clone "https://github.com/uutisseuranta/$REPO.git" "$REPO-dir"
             
-            # Ensure target directory exists
+            # Varmistetaan, että .github/workflows hakemisto on olemassa
             mkdir -p "$REPO-dir/.github/workflows"
             
-            # Copy relay file
+            # Kopioidaan uusi relee-workflow kohderepoon
             cp .github/workflows/jira-webhook-relay.yml "$REPO-dir/.github/workflows/jira-webhook-relay.yml"
             
-            # Commit and push if changed
+            # Commitoidaan ja pushataan muutokset vain jos tiedosto muuttui
             cd "$REPO-dir"
             if [ -n "$(git status --porcelain)" ]; then
               git add .github/workflows/jira-webhook-relay.yml
               git commit -m "chore(ci): deploy updated jira-webhook-relay.yml from central repo"
-              git push origin HEAD
+              # Pushataan ekspliittisesti kohderepon main-haaraan
+              git push origin HEAD:main
               echo "Changes pushed to uutisseuranta/$REPO."
             else
               echo "No changes needed for uutisseuranta/$REPO."
