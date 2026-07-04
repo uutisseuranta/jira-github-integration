@@ -16,7 +16,7 @@
 - Sub-issueita ei käytetä. Ristikkäisviittaukset toteutetaan Jira issue link -tyypeillä.
 - Natiivi **GitHub for Jira** -app hoitaa kehityspaneelin (branchit, commitit, PR:t, buildit, deploymentit) — sitä ei korvata.
 - Issue-synkronointi rakennetaan **Atlassian Automation** -flowien avulla (12 sääntöä).
-- **TECHNICAL_DESIGN.md on single source of truth** — JIRA.md arkistoidaan kun issuet #7–#11 on suljettu (D-008).
+- **TECHNICAL_DESIGN.md on single source of truth** — JIRA.md arkistoidaan kun issuet #7–#11 on suljettu (L-008).
 
 ### GitHub for Jira -integraation linkkityypit
 
@@ -113,7 +113,7 @@ Custom kenttien **display nimet** varmistettu suoraan Jira Cloud -instanssista
 | 14 | Luontiaika | `created_at` | `created` | GitHub | ✅ asetetaan kerran | ⛔ | Ei muutu |
 | 15 | Päivitysaika | `updated_at` | `updated` | Molemmat | ✅ käytetään konfliktin ratkaisuun | ✅ | Uudempi voittaa |
 
-> **Huom:** Assignee-synkronointi (aiempi rivi 4) on poistettu — katso [issue #2](https://github.com/uutisseuranta/jira-github-integration/issues/2).
+> **Huom:** Assignee-synkronointi (aiempi rivi 4) on poistettu — katso [issue #2](https://github.com/uutisseuranta/jira-github-integration/issues/2) (katso [DECISION_LOG.csv](file:///Users/jaakkokorhonen/uutisseuranta/jira-github-integration/DECISION_LOG.csv) -> L-005).
 
 ### Issuetype-mapaus
 
@@ -126,7 +126,7 @@ Custom kenttien **display nimet** varmistettu suoraan Jira Cloud -instanssista
 | `chore`, `docs`, `refactor`, `test` | Task |
 | ei labelia | Task (oletus) |
 
-> **Huom:** Päivitetty (D-007) — `feature` ja `improvement` poistettu käyttämättöminä; `enhancement` yhdistetty `feat`-riville. Katso [issue #5](https://github.com/uutisseuranta/jira-github-integration/issues/5).
+> **Huom:** Päivitetty (L-007) — `feature` ja `improvement` poistettu käyttämättöminä; `enhancement` yhdistetty `feat`-riville. Katso [issue #5](https://github.com/uutisseuranta/jira-github-integration/issues/5).
 
 ---
 
@@ -270,7 +270,7 @@ Condition: {{smart values}} condition
 
 ### Sääntö 6: GitHub issue assigned/unassigned → (poistettu)
 
-> **Poistettu** — assignee-synkronointi ei ole käytössä (D-005). Katso [issue #2](https://github.com/uutisseuranta/jira-github-integration/issues/2).
+> **Poistettu** — assignee-synkronointi ei ole käytössä (L-005). Katso [issue #2](https://github.com/uutisseuranta/jira-github-integration/issues/2).
 
 ---
 
@@ -317,7 +317,7 @@ Content-Type: application/json
 
 📄 [saanto-09-jira-status-changed.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-09-jira-status-changed.json)
 
-> **Huom:** Label-poistologiikka poistettu (D-006) — katso [issue #3](https://github.com/uutisseuranta/jira-github-integration/issues/3).
+> **Huom:** Label-poistologiikka poistettu (L-006) — katso [issue #3](https://github.com/uutisseuranta/jira-github-integration/issues/3).
 
 ---
 
@@ -333,7 +333,7 @@ Content-Type: application/json
 
 📄 [saanto-11-jira-priority-changed.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-11-jira-priority-changed.json)
 
-> **Huom:** Label-poistologiikka poistettu (D-006) — katso [issue #3](https://github.com/uutisseuranta/jira-github-integration/issues/3).
+> **Huom:** Label-poistologiikka poistettu (L-006) — katso [issue #3](https://github.com/uutisseuranta/jira-github-integration/issues/3).
 
 ---
 
@@ -343,7 +343,7 @@ Content-Type: application/json
 
 📄 [saanto-12-jira-sprint-changed.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-12-jira-sprint-changed.json)
 
-> **Huom:** Label-poistologiikka poistettu (D-006) — katso [issue #3](https://github.com/uutisseuranta/jira-github-integration/issues/3).
+> **Huom:** Label-poistologiikka poistettu (L-006) — katso [issue #3](https://github.com/uutisseuranta/jira-github-integration/issues/3).
 
 ---
 
@@ -585,7 +585,7 @@ curl -s -X POST \
 | Transition not found | Transition-nimi väärä | Tarkista **Project Settings → Workflows** |
 | `{{lookupIssues}}` tyhjä | JQL ei löydä work itemejä | Tarkista `cf[10072]` ja `cf[10071]` |
 | `{{issue.customfield_10071}}` tyhjä | Väärä smart value -syntaksi | Käytä kenttä-ID:tä, ei display-nimeä |
-| HTTP 422 GitHub API | Assignee-login ei ole GitHub-käyttäjä | Assignee-synkronointi poistettu (D-005, issue #2) |
+| HTTP 422 GitHub API | Assignee-login ei ole GitHub-käyttäjä | Assignee-synkronointi poistettu (L-005, issue #2) |
 | Resolution estää transition (Sääntö 4) | Resolution asetettu ennen transitiota | Tyhjennä Resolution **ennen** Transition-actionia |
 | `JIRA_BASE_URL` undefined | Secret puuttuu | Lisää `JIRA_BASE_URL` = `https://uutisseuranta.atlassian.net` |
 
@@ -603,12 +603,12 @@ curl -s -X POST \
 | Sub-issues | Kielletty; ristikkäisviittaukset Jira issue link -tyypeillä |
 | Sprint → GitHub natiivikäsite | Hyväksytty: sprint näkyy GitHubissa vain labelina `sprint:N` |
 | Konfliktiresoluutio | Yksinkertainen sääntö: uudempi `updated_at` voittaa |
-| Assignee-synkronointi | Poistettu (D-005) — katso [issue #2](https://github.com/uutisseuranta/jira-github-integration/issues/2) |
+| Assignee-synkronointi | Poistettu (L-005) — katso [issue #2](https://github.com/uutisseuranta/jira-github-integration/issues/2) |
 | Otsikkosynkronointi Jira→GitHub | Toteutettu etuliitelogiikalla — katso Silmukan esto ja Sääntö 13 |
-| Label-akkumuloituminen | Hyväksytty (D-006) — katso [issue #3](https://github.com/uutisseuranta/jira-github-integration/issues/3) |
-| Duplikaatit | Siivotaan käsin tarvittaessa (D-003) — katso [issue #10](https://github.com/uutisseuranta/jira-github-integration/issues/10) |
-| Automation-kutsumäärä | Jira Automation Free: 500 kutsua/kk (D-001) |
-| Historiallinen backfill | Ei toteuteta (D-004) — katso [issue #9](https://github.com/uutisseuranta/jira-github-integration/issues/9) |
+| Label-akkumuloituminen | Hyväksytty (L-006) — katso [issue #3](https://github.com/uutisseuranta/jira-github-integration/issues/3) |
+| Duplikaatit | Siivotaan käsin tarvittaessa (L-003) — katso [issue #10](https://github.com/uutisseuranta/jira-github-integration/issues/10) |
+| Automation-kutsumäärä | Jira Automation Free: 500 kutsua/kk (L-001) |
+| Historiallinen backfill | Ei toteuteta (L-004) — katso [issue #9](https://github.com/uutisseuranta/jira-github-integration/issues/9) |
 | Etuliitteet otsikoissa/kommenteissa | Hyväksytty: `[GitHub]`/`[Jira]`-etuliite näkyy käyttäjille — tarkoituksellinen valinta |
 
 ---
