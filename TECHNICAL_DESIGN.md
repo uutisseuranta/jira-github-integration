@@ -15,7 +15,7 @@
 - Kaikki kolme repositoriota (`uutisseuranta.github.io`, `patterns`, `bq-activitystreams`) ovat lähteitä.
 - Sub-issueita ei käytetä. Ristikkäisviittaukset toteutetaan Jira issue link -tyypeillä.
 - Natiivi **GitHub for Jira** -app hoitaa kehityspaneelin (branchit, commitit, PR:t, buildit, deploymentit) — sitä ei korvata.
-- Issue-synkronointi rakennetaan **Atlassian Automation** -flowien avulla (15 sääntöä).
+- Issue-synkronointi rakennetaan **Atlassian Automation** -flowien avulla (12 sääntöä).
 
 ### GitHub for Jira -integraation linkkityypit
 
@@ -96,7 +96,7 @@ Custom kenttien **display nimet** varmistettu suoraan Jira Cloud -instanssista
 
 | # | Kenttä | GitHub-vastine | Jira-vastine | Auktoriteetti | GitHub → Jira | Jira → GitHub | Konfliktiresoluutio |
 |---|---|---|---|---|---|---|---|
-| 1 | Otsikko | `title` | `summary` | GitHub | ✅ | ✅ | Uudempi `updated_at` voittaa |
+| 1 | Otsikko | `title` | `summary` | GitHub | ✅ | ⛔ (D-002) | Yksisuuntainen: GitHub → Jira |
 | 2 | Kuvaus | `body` (Markdown) | `description` (plain text) | GitHub | ✅ | ✅ | GitHub voittaa; Markdown säilyy plain textinä Jirassa |
 | 3 | Tila | `state` (open/closed) | `status` (workflow) | Jira | ✅ open→To Do, closed→Done | ✅ Done→close, muut→open+label | Jira-status on master |
 | 4 | Labelit | `labels[]` | `labels[]` | GitHub | ✅ luo uudet Jiraan | ✅ unioni molempiin | Ei ylikirjoiteta; lisätään puuttuvat |
@@ -144,8 +144,6 @@ TRIGGER  →  [CONDITIONS]  →  ACTIONS
 ### Silmukan esto (kaikki säännöt)
 
 Kommenttisäännöissä tarkistetaan etuliite: ei prosessoida kommenttia joka alkaa `[GitHub]` tai `[Jira]`.
-
-Summary-päivityssäännöissä (Sääntö 13): käytä **Wait-actionia** tai jätä silmukkaesto kokonaan pois (Free-tier). Aritmeettinen lauseke `{{issue.updated.epochMillis}} + 5000` **ei toimi** Jira Automationissa — arvo lasketaan literaalisena merkkijonona.
 
 > Katso tarkemmin [issue #1](https://github.com/uutisseuranta/jira-github-integration/issues/1).
 
@@ -437,24 +435,11 @@ Action: Send web request  (lisää sprint-label)
 
 ---
 
-### Sääntö 13: Jira summary muuttuu → Päivitä GitHub otsikko
+### Sääntö 13: Jira summary muuttuu → GitHub otsikko (poistettu)
 
-**Tila:** Suunniteltu (TODO)
-
-```
-Trigger: Field value changed → Field: Summary
-
-Condition: customfield_10072 is not empty
-
-Silmukan esto: katso issue #1 — aritmetiikka ei toimi smart valuessa.
-  VAIHTOEHTO A: Action: Wait → 5 s (⚠️ Free-tier: minimi 1 min)
-  VAIHTOEHTO B: Jätä pois (suositeltu Free-tierille)
-
-Action: Send web request
-  → Method: PATCH
-  → URL: [URL-pohja]
-  → Body: {"title": "{{issue.summary}}"}
-```
+> **Poistettu** — Free-tierillä silmukkaesto ei ole teknisesti toteutettavissa (D-002).  
+> Otsikkosynkronointi on yksisuuntainen: GitHub → Jira.  
+> Katso [issue #1](https://github.com/uutisseuranta/jira-github-integration/issues/1) ja [issue #7](https://github.com/uutisseuranta/jira-github-integration/issues/7).
 
 ---
 
@@ -499,100 +484,6 @@ Action: Send web request  (päivitä tai luo)
 
 ---
 
-## Historia-miggraatio: GitHub Actions
-
-### Tiedostot
-
-| Tiedosto | Tarkoitus |
-|---|---|
-| `.github/workflows/migrate-history.yml` | GitHub Actions workflow — käynnistetään manuaalisesti (`workflow_dispatch`) |
-| `scripts/migrate_history.py` | Python-skripti joka hakee GitHub-issuet sivuttain ja luo ne Jiran work itemeiksi |
-
-### Workflow: `migrate-history.yml`
-
-```yaml
-name: Migrate Jira Issue History
-
-on:
-  workflow_dispatch:
-    inputs:
-      project_key:
-        description: 'Jira project key (e.g. US)'
-        required: true
-        default: 'US'
-      dry_run:
-        description: 'Dry run (ei webhook-kutsuja, vain loki)'
-        required: false
-        default: 'false'
-        type: choice
-        options: ['false', 'true']
-      max_issues:
-        description: 'Max issues (0 = kaikki)'
-        required: false
-        default: '0'
-
-jobs:
-  migrate:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: pip install requests
-      - name: Run migration script
-        env:
-          JIRA_BASE_URL:          ${{ secrets.JIRA_BASE_URL }}
-          JIRA_EMAIL:             ${{ secrets.JIRA_EMAIL }}
-          JIRA_API_TOKEN:         ${{ secrets.JIRA_API_TOKEN }}
-          AUTOMATION_WEBHOOK_URL: ${{ secrets.AUTOMATION_WEBHOOK_URL }}
-          PROJECT_KEY:            ${{ inputs.project_key }}
-          DRY_RUN:                ${{ inputs.dry_run }}
-          MAX_ISSUES:             ${{ inputs.max_issues }}
-        run: python scripts/migrate_history.py
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: migration-log-${{ inputs.project_key }}-${{ github.run_id }}
-          path: migration_log.jsonl
-          retention-days: 30
-```
-
-### Python-skriptin päälogiikka
-
-1. Hakee kaikki projektin issuet `GET /rest/api/3/search` (sivutettu, 50 kerrallaan)
-2. Per issue: hakee koko muutoshistorian `GET /rest/api/3/issue/{key}/changelog`
-3. Muodostaa jokaisesta changelog-entrystä webhook-payloadin:
-   - `{{webhookData.issue}}` — issue-kenttä Automation smart valueja varten
-   - `{{webhookData.changelog}}` — author, created, items
-   - `{{webhookData.originalTimestamp}}` — alkuperäinen aika
-   - `{{webhookData.migrationMeta}}` — migraatiomerkintä
-4. POST-aa payloadin `AUTOMATION_WEBHOOK_URL`:iin
-5. Kirjoittaa `migration_log.jsonl`-lokitiedoston
-
-**Rate limit:** 100 ms viive Jira API -kutsujen välillä, 50 ms webhook-kutsujen välillä.  
-**Retry:** 429-vastaus → odottaa `Retry-After`-headerin mukaisen ajan.
-
-### Tarvittavat GitHub Secrets
-
-| Secret | Arvo | Tila |
-|--------|------|------|
-| `JIRA_EMAIL` | Jira-tilin sähköposti | ✅ asetettu |
-| `JIRA_API_TOKEN` | Atlassian API token | ✅ asetettu |
-| `AUTOMATION_WEBHOOK_URL` | Jira Automation incoming webhook URL | ✅ asetettu |
-| `JIRA_BASE_URL` | `https://uutisseuranta.atlassian.net` | [⚠️ lisättävä ennen ajoa](https://github.com/uutisseuranta/uutisseuranta.github.io/settings/secrets/actions) |
-
-### Suositeltu testijärjestys
-
-| Ajo | dry_run | max_issues | Tarkoitus |
-|---|---|---|---|
-| 1 | `true` | `5` | Tarkista Actions-loki, ei webhook-kutsuja |
-| 2 | `false` | `5` | Tarkista 5 tikettiä Jirasta |
-| 3 | `false` | `0` | Kaikki issuet |
-
----
-
 ## GitHub Actions Workflows
 
 ### 1. Relay: `jira-webhook-relay.yml`
@@ -605,7 +496,7 @@ name: Jira Webhook Relay
 on:
   issues:
     types: [opened, edited, closed, reopened, labeled, unlabeled,
-            assigned, unassigned, milestoned, demilestoned]
+            milestoned, demilestoned]
   issue_comment:
     types: [created]
 
@@ -687,7 +578,6 @@ Virallinen dokumentaatio: https://support.atlassian.com/cloud-automation/docs/wh
 | `{{webhookData.comment.body}}` | Kommentin sisältö (issue_comment) |
 | `{{webhookData.comment.user.login}}` | Kommentoijan GitHub-tunnus |
 | `{{webhookData.repository.name}}` | Repositorion nimi (ilman organia) |
-| `{{webhookData.originalTimestamp}}` | Alkuperäinen aika historia-miggraatiossa |
 | `{{lookupIssues}}` | Lookup work items -actionin tulos |
 | `{{lookupIssues.first.key}}` | Ensimmäisen tuloksen avain (esim. `US-7`) |
 | `{{lookupIssues.size}}` | Tulosten lukumäärä |
@@ -741,8 +631,6 @@ Virallinen dokumentaatio: https://support.atlassian.com/cloud-automation/docs/wh
     "state": "open",
     "state_reason": null,
     "labels": [{"name": "bug"}],
-    "assignees": [{"login": "username"}],
-    "assignee": {"login": "username"},
     "milestone": {
       "title": "v1.0",
       "due_on": "2026-08-01T00:00:00Z",
@@ -824,8 +712,10 @@ curl -s -X POST \
 | Sprint → GitHub natiivikäsite | Hyväksytty: sprint näkyy GitHubissa vain labelina `sprint:N` |
 | Konfliktiresoluutio | Yksinkertainen sääntö: uudempi `updated_at` voittaa |
 | Assignee-synkronointi | Poistettu — katso [issue #2](https://github.com/uutisseuranta/jira-github-integration/issues/2) |
+| Otsikkosynkronointi Jira→GitHub | Poistettu — katso D-002 ja [issue #7](https://github.com/uutisseuranta/jira-github-integration/issues/7) |
+| Label-akkumuloituminen | Hyväksytty — katso D-006 ja [issue #3](https://github.com/uutisseuranta/jira-github-integration/issues/3) |
 | Automation-kutsumäärä | Jira Automation Free: 500 kutsua/kk |
-| Historia-miggraation aikaleima | Alkuperäinen aika säilyy `originalTimestamp`-kentässä |
+| Historiallinen backfill | Ei toteuteta — katso D-004 |
 
 ---
 
