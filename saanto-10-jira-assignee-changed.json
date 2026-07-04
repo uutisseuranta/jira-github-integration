@@ -1,0 +1,42 @@
+{
+  "name": "Sääntö 10: Jira assignee muuttuu → Päivitä GitHub assignee",
+  "state": "DISABLED",
+  "canOtherRuleTrigger": false,
+  "notifyOnError": "FIRSTERROR",
+  "_comment": "Tila: Suunniteltu (TODO). RAJOITUS: {{issue.assignee.name}} palauttaa Jira-käyttäjätunnuksen, mutta GitHub vaatii GitHub-loginin. Toimii suoraan vain jos Jira-tunnus == GitHub-login. Jos tunnukset eroavat, tarvitaan user-mapping-taulukko.",
+  "trigger": {
+    "component": "TRIGGER",
+    "type": "jira.trigger.issue.assigned",
+    "value": {}
+  },
+  "components": [
+    {
+      "component": "CONDITION",
+      "type": "jira.condition.if",
+      "value": {
+        "conditions": [
+          {
+            "first": "{{issue.customfield_10072}}",
+            "operator": "IS_NOT_EMPTY"
+          }
+        ],
+        "operator": "AND"
+      }
+    },
+    {
+      "component": "ACTION",
+      "type": "jira.util.send.web.request",
+      "value": {
+        "method": "PATCH",
+        "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
+        "headers": {
+          "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "assignees": ["{{#if issue.assignee.name}}{{issue.assignee.name}}{{/if}}"]
+        }
+      }
+    }
+  ]
+}
