@@ -32,8 +32,8 @@
         "conditions": [
           {
             "first": "{{issue.summary}}",
-            "operator": "STARTS_WITH",
-            "second": "Jira:"
+            "operator": "NOT_STARTS_WITH",
+            "second": "[GitHub]"
           }
         ],
         "operator": "AND"
@@ -50,7 +50,7 @@
           "Content-Type": "application/json"
         },
         "body": {
-          "title": "{{issue.summary}}"
+          "title": "[Jira] {{issue.summary}}"
         }
       }
     }
