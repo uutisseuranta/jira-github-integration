@@ -19,13 +19,14 @@ Ennen kuin mikään toimii, lisää nämä **GitHub repository secretseihin** (`
 ## Rakenne
 
 ```
-├── saanto-01...15-*.json      # Jira Automation -säännöt (JSON-export)
+├── saanto-01...09-*.json         # Jira Automation -säännöt (JSON-export)
 ├── webhook-payload-example.json  # GitHub webhook payload -esimerkki
-├── scripts/
-│   └── migrate-history.py     # Migraatioskripti: GitHub Issues → Jira
+├── migrate-history.py            # Migraatioskripti: GitHub Issues → Jira
 ├── .github/workflows/
-│   └── migrate-history.yml    # GitHub Actions workflow migraatiolle
-└── TECHNICAL_DESIGN.md        # Tekninen suunnittelu ja päätökset
+│   └── migrate-history.yml       # GitHub Actions workflow migraatiolle
+├── TECHNICAL_DESIGN.md           # Tekninen suunnittelu ja päätökset
+├── DECISION_LOG.csv              # Arkkitehtuuripäätökset
+└── STATUS.md                     # Toteutuksen tila
 ```
 
 ## Nopea aloitus
