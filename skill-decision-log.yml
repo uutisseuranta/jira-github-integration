@@ -1,0 +1,50 @@
+# skill-decision-log.yml
+# Nimetty uudelleen skill-decision_log.yml → skill-decision-log.yml (kebab-case, issue #19)
+# Alkuperäinen sisältö säilytetty muuttumattomana.
+
+skill:
+  name: decision-log
+  version: 1
+  description: >
+    Päätösloki-skill jira-github-integration-repolle.
+    Ohjaa agentin kirjaamaan arkkitehtuuripäätökset DECISION_LOG.csv:hen
+    ennen muita toimenpiteitä.
+
+rules:
+  - id: log-before-action
+    trigger: any_architectural_decision
+    action: >
+      Ennen kuin teet arkkitehtuuripäätöksen tai merkittävän teknisen valinnan,
+      lisää se DECISION_LOG.csv:hen muodossa:
+      id,date,title,decision,rationale,affects_issues
+
+  - id: kebab-case-filenames
+    trigger: create_file
+    action: >
+      Tarkista tiedostonimi ennen luomista:
+      - Normatiiviset sopimusdokumentit: SCREAMING_SNAKE_CASE.md
+      - Kaikki muut: kebab-case
+      - Ei snake_case, camelCase tai PascalCase tavallisille tiedostoille.
+
+  - id: no-subdirectories
+    trigger: create_directory
+    action: >
+      Älä luo alikansioita. Kaikki tiedostot sijaitsevat repositorion juuressa.
+      Ainoa sallittu poikkeus: .github/-kansio Actions-workflowille.
+
+  - id: absolute-cross-repo-links
+    trigger: reference_other_repo
+    action: >
+      Kaikki viittaukset toisiin repositorioihin kirjoitetaan absoluuttisina
+      GitHub-URL:eina, ei suhteellisina polkuina.
+
+  - id: semver
+    trigger: create_release_or_tag
+    action: >
+      Versionumerointi: SemVer muodossa vX.Y.Z.
+      Git-tagit ja GitHub Releases käyttävät samaa muotoa.
+
+source:
+  repo: uutisseuranta/jira-github-integration
+  conventions: CODE_CONVENTIONS.md
+  decision_log: DECISION_LOG.csv

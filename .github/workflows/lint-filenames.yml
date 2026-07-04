@@ -1,0 +1,23 @@
+name: Lint filenames
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  filenames:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check skill-*.yml files use kebab-case (no snake_case)
+        # CODE_CONVENTIONS: skill-tiedostot käyttävät kebab-casea, ei alaviivoja (issue #19, #22)
+        run: |
+          if find . -maxdepth 1 -name 'skill-*.yml' | grep -P 'skill-[^/]*_'; then
+            echo 'FAIL: snake_case detected in skill-*.yml filename'
+            echo 'Rename using hyphens: skill-my-name.yml'
+            exit 1
+          fi
+          echo 'OK: all skill-*.yml filenames use kebab-case'
