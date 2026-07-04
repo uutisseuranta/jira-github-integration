@@ -1,0 +1,60 @@
+name: Deploy Integration Workflows
+
+# Työkulku synkronoi jira-webhook-relay.yml -tiedoston organisaation muihin varastoihin.
+# Käynnistyy automaattisesti, kun tiedosto muuttuu main-haarassa, tai manuaalisesti (workflow_dispatch).
+# Manuaalinen käynnistys mahdollistaa kaikkien kohderepojen synkronoinnin pakotetusti sen hetkisellä main-versiolla.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/jira-webhook-relay.yml
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Run Rules Validation Tests
+        run: python3 test-rules.py
+
+      - name: Deploy to Target Repositories
+        env:
+          ORG_PAT: ${{ secrets.ORG_PAT }}
+        run: |
+          TARGET_REPOS=(
+            "uutisseuranta.github.io"
+            "patterns"
+            "bq-activitystreams"
+            "skills"
+          )
+          
+          # Määritetään turvallinen URL-uudelleenkirjoitus PAT-tokenille, jotta token ei vuoda virhelokeihin kloonattaessa
+          git config --global url."https://x-access-token:${ORG_PAT}@github.com/".insteadOf "https://github.com/"
+          
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          for REPO in "${TARGET_REPOS[@]}"; do
+            echo "Deploying to uutisseuranta/$REPO..."
+            
+            git clone "https://github.com/uutisseuranta/$REPO.git" "$REPO-dir"
+            mkdir -p "$REPO-dir/.github/workflows"
+            cp .github/workflows/jira-webhook-relay.yml "$REPO-dir/.github/workflows/jira-webhook-relay.yml"
+            
+            cd "$REPO-dir"
+            if [ -n "$(git status --porcelain)" ]; then
+              git add .github/workflows/jira-webhook-relay.yml
+              git commit -m "chore(ci): deploy updated jira-webhook-relay.yml from central repo"
+              # Pushataan ekspliittisesti kohdehaaraan main, jotta vältytään riippuvuudelta kohderepon oletushaarasta
+              git push origin HEAD:main
+              echo "Changes pushed to uutisseuranta/$REPO."
+            else
+              echo "No changes needed for uutisseuranta/$REPO."
+            fi
+            cd ..
+            rm -rf "$REPO-dir"
+          done

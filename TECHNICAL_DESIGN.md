@@ -97,7 +97,7 @@ Custom kenttien **display nimet** varmistettu suoraan Jira Cloud -instanssista
 
 | # | Kenttä | GitHub-vastine | Jira-vastine | Auktoriteetti | GitHub → Jira | Jira → GitHub | Konfliktiresoluutio |
 |---|---|---|---|---|---|---|---|
-| 1 | Otsikko | `title` | `summary` | Molemmat | ✅ etuliite `[GitHub]` lisätään Jiraan | ✅ etuliite `[Jira]` lisätään GitHubiin; `[GitHub]`-alkuiset skippataan | Etuliite estää silmukan; molempiin suuntiin |
+| 1 | Otsikko | `title` | `summary` | Molemmat | ✅ etuliite `Git:` lisätään Jiraan | ✅ etuliite `Jira:` lisätään GitHubiin; `Git:`-alkuiset skippataan | Etuliite estää silmukan; molempiin suuntiin |
 | 2 | Kuvaus | `body` (Markdown) | `description` (plain text) | GitHub | ✅ | ✅ | GitHub voittaa; Markdown säilyy plain textinä Jirassa |
 | 3 | Tila | `state` (open/closed) | `status` (workflow) | Jira | ✅ open→To Do, closed→Done | ✅ Done→close, muut→open+label | Jira-status on master |
 | 4 | Labelit | `labels[]` | `labels[]` | GitHub | ✅ luo uudet Jiraan | ✅ unioni molempiin | Ei ylikirjoiteta; lisätään puuttuvat |
@@ -146,24 +146,24 @@ TRIGGER  →  [CONDITIONS]  →  ACTIONS
 
 Silmukkaesto perustuu **etuliitelogiikkaan** — sama periaate koskee sekä kommentteja että otsikkosynkronointia:
 
-- Automaatio lisää etuliitteen **`[GitHub]`** kaikkiin arvoihin, jotka se kirjoittaa Jiraan (kommentit, summary).
-- Automaatio lisää etuliitteen **`[Jira]`** kaikkiin arvoihin, jotka se kirjoittaa GitHubiin (kommentit, title).
-- Jokainen flow tarkistaa saapuvan arvon ensin: jos se **alkaa** `[GitHub]` tai `[Jira]`, flow **skippataan** — arvo on automaation itsensä tuottama, ei käyttäjän muutos.
+- Kommentit: Automaatio lisää etuliitteen **`[GitHub]`** tai **`[Jira]`** kommentin alkuun. Jos kommentti alkaa näillä, se ohitetaan silmukan välttämiseksi.
+- Otsikot: Automaatio käyttää lyhyitä etuliitteitä **`Git:`** ja **`Jira:`** otsikon/summaryn alussa (noudattaen `L-002`-päätöstä).
+- Jokainen flow tarkistaa saapuvan arvon ensin: jos se alkaa näillä etuliitteillä, flow **skippataan** — arvo on automaation itsensä tuottama, ei käyttäjän muutos.
 
 #### Käytännön esimerkki — otsikko
 
 ```
 Käyttäjä muuttaa GitHub-issuen titlen: "Uusi otsikko"
-  → GitHub → Jira (Sääntö 2/13): kirjoittaa Jiraan "[GitHub] Uusi otsikko"
+  → GitHub → Jira (Sääntö 2): kirjoittaa Jiraan "Git: Uusi otsikko"
 
 Jira havaitsee summary-muutoksen:
-  → Jira → GitHub (Sääntö 13): tarkistaa → alkaa "[GitHub]" → SKIP
+  → Jira → GitHub (Sääntö 13): tarkistaa → alkaa "Git:" → SKIP
 
 Käyttäjä muuttaa Jiran summaryn: "Korjattu otsikko"
-  → Jira → GitHub (Sääntö 13): kirjoittaa GitHubiin "[Jira] Korjattu otsikko"
+  → Jira → GitHub (Sääntö 13): kirjoittaa GitHubiin "Jira: Korjattu otsikko"
 
 GitHub havaitsee title-muutoksen:
-  → GitHub → Jira (Sääntö 2/13): tarkistaa → alkaa "[Jira]" → SKIP
+  → GitHub → Jira (Sääntö 2): tarkistaa → alkaa "Jira:" → SKIP
 ```
 
 #### Käytännön esimerkki — kommentti
@@ -221,13 +221,13 @@ Condition: {{smart values}} condition
 |--------|------|
 | Space | `Uutisseuranta (US)` |
 | Work item type | `Story` |
-| Summary | `[GitHub] {{webhookData.issue.title}}` |
+| Summary | `Git: {{webhookData.issue.title}}` |
 | Description | `{{webhookData.issue.body}}` |
 | `customfield_10071` | `{{webhookData.repository.name}}` |
 | `customfield_10072` | `{{webhookData.issue.number}}` |
 | `customfield_10073` | `{{webhookData.issue.html_url}}` |
 
-> **Huom:** Summary kirjoitetaan aina etuliitteellä `[GitHub]` — tämä estää Jira→GitHub-silmukan Sääntö 13:ssa.
+> **Huom:** Summary kirjoitetaan aina etuliitteellä `Git:` — tämä estää Jira→GitHub-silmukan Sääntö 13:ssa.
 
 ---
 
@@ -237,7 +237,7 @@ Condition: {{smart values}} condition
 
 📄 [saanto-02-github-issue-edited.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-02-github-issue-edited.json)
 
-> **Huom:** Summary kirjoitetaan etuliitteellä `[GitHub]`. Ensin tarkistetaan, ettei title alkanut `[Jira]` — se tarkoittaisi, että GitHubin muutos on automaation itsensä tekemä (Sääntö 13 kirjoitti sen), ja silloin Jiraa ei päivitetä.
+> **Huom:** Summary kirjoitetaan etuliitteellä `Git:`. Ensin tarkistetaan, ettei title alkanut `Jira:` — se tarkoittaisi, että GitHubin muutos on automaation itsensä tekemä (Sääntö 13 kirjoitti sen), ja silloin Jiraa ei päivitetä.
 
 ---
 
@@ -353,8 +353,8 @@ Content-Type: application/json
 
 📄 [saanto-13-jira-summary-changed.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-13-jira-summary-changed.json)
 
-> **Silmukkaesto:** Jos summary alkaa `[GitHub]`, se on Sääntö 2:n kirjoittama — ei käyttäjän muutos, joten flow skippataan.  
-> GitHub-päässä Sääntö 2 tarkistaa vastaavasti, ettei title alkanut `[Jira]` ennen kuin kirjoittaa Jiraan.
+> **Silmukkaesto:** Jos summary alkaa `Git:`, se on Sääntö 2:n kirjoittama — ei käyttäjän muutos, joten flow skippataan.  
+> GitHub-päässä Sääntö 2 tarkistaa vastaavasti, ettei title alkanut `Jira:` ennen kuin kirjoittaa Jiraan.
 
 ---
 
@@ -610,6 +610,51 @@ curl -s -X POST \
 | Automation-kutsumäärä | Jira Automation Free: 500 kutsua/kk (L-001) |
 | Historiallinen backfill | Ei toteuteta (L-004) — katso [issue #9](https://github.com/uutisseuranta/jira-github-integration/issues/9) |
 | Etuliitteet otsikoissa/kommenteissa | Hyväksytty: `[GitHub]`/`[Jira]`-etuliite näkyy käyttäjille — tarkoituksellinen valinta |
+
+---
+
+## Toteutusjärjestys
+
+| Vaihe | Kuvaus | Tila |
+|---|---|---|
+| 1 | Luo custom-kentät Jiraan (source_repo, github_issue_number, github_url) | ✅ VALMIS |
+| 2 | Asenna GitHub for Jira -app, yhdistä kaikki repot | ✅ VALMIS |
+| 3 | Tallenna GitHub PAT + Jira Automation webhook URL secreteihin | ✅ VALMIS |
+| 4 | Luo relay-workflow (`jira-webhook-relay.yml`) | ✅ VALMIS |
+| 5 | Sääntö 1: GitHub issue opened → Luo Jira work item | ✅ VALMIS (testattu, US-7) |
+| 6 | Säännöt 2–8: Testaa ja ota käyttöön GitHub → Jira | 🔄 Käynnissä (issue #7) |
+| 7 | Säännöt 9–15: Toteuta Jira → GitHub | 📋 Suunniteltu (issue #8) |
+| 8 | Lisää JIRA_BASE_URL secret + aja historia-migraatio | 📋 Suunniteltu (issue #9) |
+| 9 | Backfill-validointi | 📋 Suunniteltu (issue #10) |
+
+---
+
+## Branch protection & CI policy
+
+Organisaation laajuiset tietoturva- ja laadunvarmistussäännöt päähaaran (`main`) suojaamiseksi:
+
+### 1. Haaransuojauksen yleiset säännöt (Branch Protection)
+*   **Require a pull request before merging**: Kaikki muutokset päähaaraan on tehtävä Pull Requestin kautta. Suora push päähaaraan on kielletty.
+*   **Require approvals**: Jokaiseen PR:ään vaaditaan vähintään yksi (1) hyväksytty katselmointi (approving review) ennen mergeämistä.
+*   **Require review from Code Owners**: Jos PR muuttaa tiedostoja, joille on määritetty omistaja `CODEOWNERS`-tiedostossa, mergeäminen vaatii kyseisen omistajan hyväksynnän.
+*   *Rajoitus*: Yksityisessä `skills`-repositoriossa branch protection ei ole aktiivinen GitHub Free -lisenssirajoitusten takia.
+
+### 2. Pakolliset status-tarkistukset (Required status checks) per repositorio
+Ennen PR:n hyväksymistä seuraavien CI-tarkistusten on mentävä onnistuneesti läpi:
+*   **patterns**:
+    *   Yksikkötestit (`npm run test`)
+    *   Tyylit ja syntaksi (`Stylelint`, `html-validate`)
+*   **bq-activitystreams**:
+    *   Yksikkötestit ja AS2-sopimuksen yhteensopivuustestit (AS2 compatibility tests)
+    *   DevSecOps-skannaukset (Bandit, Dependabot, Trivy-konttikuva)
+*   **uutisseuranta.github.io**:
+    *   Frontend-testit ja syntaksi (ESLint/TypeScript)
+*   **jira-github-integration**:
+    *   Sääntöjen automaattinen validointi (Python-testit `test-rules.py` varmistamassa L-002, L-006, JSON-validiuden jne.) ja YAML syntaksitarkistus
+
+### 3. Koodivastuut (CODEOWNERS)
+*   Jokaisessa repositoriossa määritellään `CODEOWNERS`-tiedosto juurikansiossa.
+*   Oletussääntönä kaikelle koodille on `@jaakkokorhonen`, joka vastaa integraation ja infrastruktuurin katselmoinnista.
 
 ---
 

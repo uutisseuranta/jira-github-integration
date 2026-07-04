@@ -3,7 +3,7 @@
   "state": "DISABLED",
   "canOtherRuleTrigger": false,
   "notifyOnError": "FIRSTERROR",
-  "_comment": "Tila: Suunniteltu (TODO). Label-poistologiikka poistettu (D-006).",
+  "_comment": "Tila: Suunniteltu (TODO). Label-poistologiikka poistettu (L-006).",
   "trigger": {
     "component": "TRIGGER",
     "type": "jira.trigger.field.changed",
