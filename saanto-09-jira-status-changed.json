@@ -1,9 +1,9 @@
 {
   "name": "Sääntö 9: Jira status muuttuu → Päivitä GitHub issue state",
-  "state": "DISABLED",
+  "state": "ENABLED",
   "canOtherRuleTrigger": false,
   "notifyOnError": "FIRSTERROR",
-  "_comment": "Tila: Suunniteltu (TODO). Label-poistologiikka poistettu (L-006).",
+  "_comment": "Tila: Tuotannossa. Silmukkaesto: GitHub-puoli skipaa [Jira]-etuliitteellä alkavat kommentit (D-002). Label-poistologiikka poistettu (L-006).",
   "trigger": {
     "component": "TRIGGER",
     "type": "jira.trigger.issue.transitioned",
@@ -24,8 +24,24 @@
       }
     },
     {
+      "component": "CONDITION",
+      "type": "jira.condition.if",
+      "_comment": "Sulkee GitHub-issuen kun Jira-status on Done; avaa uudelleen muilla transitioilla.",
+      "value": {
+        "conditions": [
+          {
+            "first": "{{issue.status.name}}",
+            "operator": "IN",
+            "second": "Done,In Progress,To Do,In Review"
+          }
+        ],
+        "operator": "AND"
+      }
+    },
+    {
       "component": "ACTION",
       "type": "jira.util.send.web.request",
+      "_comment": "PATCH GitHub issue state: Done → closed (completed), muut → open. Silmukkaesto: tämä ei triggeröi Sääntöä 1 koska GitHub-issue-eventit ovat eri webhook-kanava kuin Jira-automation.",
       "value": {
         "method": "PATCH",
         "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
@@ -36,21 +52,6 @@
         "body": {
           "state": "{{#if issue.status.name == 'Done'}}closed{{else}}open{{/if}}",
           "state_reason": "{{#if issue.status.name == 'Done'}}completed{{/if}}"
-        }
-      }
-    },
-    {
-      "component": "ACTION",
-      "type": "jira.util.send.web.request",
-      "value": {
-        "method": "POST",
-        "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}/labels",
-        "headers": {
-          "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
-          "Content-Type": "application/json"
-        },
-        "body": {
-          "labels": ["status:{{issue.status.name | toLower}}"]
         }
       }
     }
