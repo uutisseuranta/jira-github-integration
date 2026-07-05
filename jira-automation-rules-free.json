@@ -22,7 +22,8 @@
         "type": "jira.incoming.webhook",
         "value": {
           "searchOrProvide": "none",
-          "jql": null
+          "jql": null,
+          "webhookToken": "081e586360f825ae9b6a3622edce760b76d6e36c"
         },
         "conditions": [],
         "children": [],
@@ -102,6 +103,12 @@
           "ruleIdUuid": "019f288b-703a-7e52-bd20-d9cb4f5cb560",
           "tagType": "IS_RULE_UPDATED",
           "tagValue": "true"
+        },
+        {
+          "id": 2000000,
+          "ruleIdUuid": "019f288b-703a-7e52-bd20-d9cb4f5cb560",
+          "tagType": "WEBHOOK_TOKEN",
+          "tagValue": "081e586360f825ae9b6a3622edce760b76d6e36c"
         }
       ],
       "ruleScope": {
