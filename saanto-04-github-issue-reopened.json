@@ -27,7 +27,7 @@
     },
     {
       "component": "ACTION",
-      "type": "jira.issue.lookup",
+      "type": "jira.lookup.issues",
       "value": {
         "query": {
           "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
