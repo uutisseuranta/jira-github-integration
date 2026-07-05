@@ -1,8 +1,7 @@
-# Miksi tämä workflow on olemassa:
-# CODE_CONVENTIONS määrittelee kebab-case-nimeamiskonvention kaikille tiedostoille
-# jotka eivät ole normatiivisia sopimusdokumentteja (SCREAMING_SNAKE_CASE.md) tai
-# README/LICENSE. Tämä workflow valvoo konventiota automaattisesti jokaisessa
-# pushissa ja PR:ssä, jotta manuaalinen koodikatselmointi ei ole ainoa esto.
+# lint-filenames.yml — valvoo tiedostonimien kebab-case-konventiota automaattisesti
+# CODE_CONVENTIONS määrittelee kebab-case-nimeämisen kaikille tiedostoille
+# jotka eivät ole normatiivisia sopimusdokumentteja (SCREAMING_SNAKE_CASE.md) tai README/LICENSE.
+# Tämä workflow on ainoa automaattinen esto — ilman sitä konventiota valvoo vain koodikatselmointi.
 # Viite: CODE_CONVENTIONS.md — Tiedostojen nimeäminen; issue #22.
 
 name: Lint filenames
@@ -20,15 +19,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Tarkista että tiedostonimet noudattavat kebab-case-konventiota
-        # Säännöt (CODE_CONVENTIONS.md):
-        #   OK  : kebab-case.ext, SCREAMING_SNAKE_CASE.md, README.md, LICENSE
-        #   FAIL: snake_case.ext, camelCase.ext, PascalCase.ext
-        # Tarkistus: etsitään tiedostoja joiden nimessä on alaviiva (snake_case)
-        # ja jotka eivät ole sallittuja SCREAMING_SNAKE_CASE-poikkeuksia.
         run: |
           ALLOWED_SCREAMING="CODE_CONVENTIONS.md|DECISION_LOG.csv|DECISION_PROCESS.md|DESIGN_GUIDELINES.md|TECHNICAL_DESIGN.md|README.md|LICENSE|CODEOWNERS"
 
-          # Etsitään kaikki tiedostot juuressa (ei .github/ alla)
+          # -maxdepth 1 rajaa tarkistuksen juureen: .github/-kansion workflowt
+          # noudattavat omaa kebab-case-konventiotaan eikä niitä tule sekoittaa
+          # juuren tiedostojen tarkistukseen.
           VIOLATIONS=$(find . -maxdepth 1 -type f \
             | sed 's|^./||' \
             | grep '_' \
