@@ -1,4 +1,5 @@
 {
+  "cloud": true,
   "rules": [
     {
       "name": "Sääntö 1: GitHub issue opened → Luo Jira work item",
