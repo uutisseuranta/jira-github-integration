@@ -97,20 +97,21 @@ Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtais
 
 | Tiedosto | Tarkoitus |
 |---|---|
-| [`saanto-01-github-issue-opened.json`](saanto-01-github-issue-opened.json) | GitHub issue opened → luo Jira work item |
-| [`saanto-02-github-issue-edited.json`](saanto-02-github-issue-edited.json) | GitHub issue edited → päivitä Jira summary + description |
-| [`saanto-03-github-issue-closed.json`](saanto-03-github-issue-closed.json) | GitHub issue closed → transition Jira → Done |
-| [`saanto-04-github-issue-reopened.json`](saanto-04-github-issue-reopened.json) | GitHub issue reopened → transition Jira → To Do |
-| [`saanto-05-github-issue-labeled.json`](saanto-05-github-issue-labeled.json) | GitHub issue labeled/unlabeled → päivitä Jira labels + priority |
-| [`saanto-07-github-issue-milestoned.json`](saanto-07-github-issue-milestoned.json) | GitHub milestone → päivitä Jira fixVersions |
-| [`saanto-08-github-comment-created.json`](saanto-08-github-comment-created.json) | GitHub comment → kommentti Jiraan (silmukkaesto: skip jos alkaa `[Jira]`) |
-| [`saanto-09-jira-status-changed.json`](saanto-09-jira-status-changed.json) | Jira status changed → päivitä GitHub issue state |
+| [`saanto-01-github-issue-opened.json`](saanto-01-github-issue-opened.json) | GitHub-issue avattu → luo Jira-työkohde |
+| [`saanto-02-github-issue-edited.json`](saanto-02-github-issue-edited.json) | GitHub-issue muokattu → päivitä Jira summary ja description |
+| [`saanto-03-github-issue-closed.json`](saanto-03-github-issue-closed.json) | GitHub-issue suljettu → siirrä Jira-tila → Done |
+| [`saanto-04-github-issue-reopened.json`](saanto-04-github-issue-reopened.json) | GitHub-issue avattu uudelleen → siirrä Jira-tila → To Do |
+| [`saanto-05-github-issue-labeled.json`](saanto-05-github-issue-labeled.json) | GitHub-issue labeloitu/labelointi poistettu → päivitä Jira-labelit ja prioriteetti |
+| [`saanto-07-github-issue-milestoned.json`](saanto-07-github-issue-milestoned.json) | GitHub-milestone muutettu → päivitä Jira fixVersions |
+| [`saanto-08-github-comment-created.json`](saanto-08-github-comment-created.json) | GitHub-kommentti lisätty → luo kommentti Jiraan (silmukkaesto: ohitetaan jos alkaa `[Jira]`) |
+| [`saanto-09-jira-status-changed.json`](saanto-09-jira-status-changed.json) | Jira-tila muutettu → päivitä GitHub-issuen tila |
+| [`test-rules.py`](test-rules.py) | Automaattiset testit: JSON-syntaksi, kenttäviittaukset, silmukkaesto |
 | [`test-webhook.sh`](test-webhook.sh) | Manuaalinen curl-testi — aja paikallisesti webhookin testaamiseen |
 | [`webhook-payload-example.json`](webhook-payload-example.json) | Esimerkki webhook-payloadista — käytä testauksen pohjana |
 | [`.github/workflows/deploy-integration.yml`](.github/workflows/deploy-integration.yml) | Synkronoi `jira-webhook-relay.yml` automaattisesti organisaation repoihin (`uutisseuranta.github.io`, `patterns`, `bq-activitystreams`, `skills`, `ops`) |
 | [`.github/workflows/jira-webhook-relay.yml`](.github/workflows/jira-webhook-relay.yml) | GitHub Actions -rele: välittää GitHub-webhook-pyynnöt Jira Automation Incoming Webhook -osoitteeseen |
 | [`.github/workflows/lint-filenames.yml`](.github/workflows/lint-filenames.yml) | CI-tarkistus: varmistaa tiedostonimien yhdenmukaisuuden CODE_CONVENTIONS.md-säännöillä |
-| [`migrate-history.py`](migrate-history.py) | Migraatioskripti: siirtää vanhat GitHub Issues → Jira, lisää `Git:`-etuliitteen tiketteihin |
+| [`migrate-history.py`](migrate-history.py) | Migraatioskripti: siirtää vanhat GitHub-issuet Jiraan, lisää `Git:`-etuliitteen tiketteihin |
 
 ---
 
@@ -118,6 +119,7 @@ Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtais
 
 ```
 ├── saanto-01...09-*.json         # Jira Automation flows (JSON-export)
+├── test-rules.py                 # Automaattiset testit: JSON-syntaksi, kenttäviittaukset, silmukkaesto
 ├── webhook-payload-example.json  # GitHub webhook payload -esimerkki
 ├── migrate-history.py            # Migraatioskripti: GitHub Issues → Jira
 ├── .github/workflows/
@@ -132,6 +134,16 @@ Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtais
 
 ---
 
+## Lisädokumentaatio
+
+| Tiedosto | Sisältö |
+|---|---|
+| [`TECHNICAL_DESIGN.md`](TECHNICAL_DESIGN.md) | Tekninen suunnittelu: arkkitehtuuri, kenttämapaukset, silmukkaestologiikka, sääntöjen kuvaukset |
+| [`DECISION_LOG.csv`](DECISION_LOG.csv) | Arkkitehtuuripäätökset: päätöksen tunnus (L-xxx), kuvaus, perustelu ja päivämäärä |
+| [`CODE_CONVENTIONS.md`](CODE_CONVENTIONS.md) | Nimeämis- ja koodaussäännöt: tiedostonimet, JSON-rakenne, commit-viestit |
+
+---
+
 ## Nopea aloitus
 
 1. Lisää secretit (katso taulukko yllä) — GitHub UI:lla tai `gh secret set` -komennolla
@@ -142,7 +154,24 @@ Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtais
    - **Content type:** `application/json`
    - **Secret:** `GITHUB_WEBHOOK_SECRET`-secretin arvo
    - **Events:** _Issues_ ja _Issue comments_
-5. Testaa: luo GitHub issue → tarkista että Jira-issue syntyy
+5. Testaa luomalla GitHub-issue → tarkista että Jira-issue syntyy
+5b. Tai testaa manuaalisesti: `bash test-webhook.sh`
+
+---
+
+## Vianetsintä (GitHub Actions)
+
+| Virhe / oire | Syy | Ratkaisu |
+|---|---|---|
+| `HTTP 400 Missing token` | `JIRA_WEBHOOK_TOKEN`-secret puuttuu tai on väärin asetettu | Tarkista ja aseta secret: `gh secret set JIRA_WEBHOOK_TOKEN` |
+| `HTTP 401 Unauthorized` | `JIRA_API_TOKEN` on vanhentunut tai virheellinen | Luo uusi token [Atlassian-profiilissa](https://id.atlassian.com/manage-profile/security/api-tokens) ja päivitä secret |
+| Workflow skippattu kokonaan | `JIRA_BASE_URL` tai `JIRA_WEBHOOK_URL` puuttuu | Tarkista secretit: `gh secret list --repo uutisseuranta/jira-github-integration` |
+| Jira-tiketti ei synny | Saanto-01 on disabled-tilassa | Aktivoi flow: Jira settings → Automation flows → saanto-01 → Enable |
+| Workflow ei käynnisty | Webhook ei lähetä oikeita eventtejä | Tarkista webhook-asetuksista että _Issues_ ja _Issue comments_ on valittu |
+
+Lisää lokeja löytyy: **GitHub → Actions → valitse workflow-ajo → katso step-kohtaiset lokit** sekä **Jira settings → Automation flows → Audit log**.
+
+---
 
 ## Migraatio (vanhat issuet)
 
