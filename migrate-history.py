@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Migrate GitHub Issues → Jira.
+"""Migrate GitHub Issues → Jira. [ARKISTOITU — ei ajeta tuotannossa, ks. D-004]
 
-Migroi GitHub-repon avoimet issuet Jiraan ja tallentaa linkit
-custom fieldeihin (GitHub Issue Number = 10072, GitHub Repo = 10071).
+Tämä skripti on säilytetty referenssinä ja varmuuskopiointia varten.
+Historiallista backfilliä ei tehdä (päätös D-004): uudet GitHub-issuet
+synkronoidaan Jiraan reaaliajassa Jira Automation -sääntöjen kautta (saanto-01 jne.).
 
-Käyttö: Ajettavissa suoraan tai GitHub Actions -workflown kautta
-(.github/workflows/migrate-history.yml).
+Jos backfill on tarpeen tulevaisuudessa, tarkista ensin DECISION_LOG.csv D-004
+ja avaa uusi issue ennen ajoa — skripti luo Jira-issueja massana, vahingollinen
+ajo voi duplikoida satoja tikettejä.
 
 Vaaditut ympäristömuuttujat:
   GITHUB_TOKEN      - GitHub Personal Access Token (repo scope)
@@ -31,7 +33,7 @@ GITHUB_REPO = os.environ["GITHUB_REPO"]
 DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
 GITHUB_OWNER = "uutisseuranta"
 
-# Jira custom field IDs
+# Jira custom field ID:t — organisaatiokohtaiset, ks. DECISION_LOG.csv D-006
 CF_GITHUB_NUMBER = "customfield_10072"
 CF_GITHUB_REPO = "customfield_10071"
 
@@ -49,7 +51,7 @@ def get_github_issues():
         batch = resp.json()
         if not batch:
             break
-        # Suodata pull requestit pois
+        # GitHub palauttaa pull requestit issues-endpointin kautta; suodatetaan ne pois
         issues.extend([i for i in batch if "pull_request" not in i])
         page += 1
     return issues
@@ -60,6 +62,8 @@ def create_jira_issue(gh_issue):
     payload = {
         "fields": {
             "project": {"key": JIRA_PROJECT_KEY},
+            # Git:-etuliite noudattaa L-002 prefix-mekanismia: Jira Automation
+            # skipaa otsikkopäivityksen kun otsikko alkaa 'Git:' tai 'Jira:'
             "summary": f"Git: {gh_issue['title']}",
             "description": {
                 "type": "doc",
