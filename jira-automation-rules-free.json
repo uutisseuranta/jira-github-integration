@@ -64,7 +64,33 @@
             }
           ]
         }
-      ]
+      ],
+      "clientKey": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "authorAccountId": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8",
+      "actor": {
+        "type": "ACCOUNT_ID",
+        "value": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8"
+      },
+      "ruleScope": {
+        "resources": [
+          "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        ]
+      },
+      "ruleHome": {
+        "ruleLifecycleHome": {
+          "locationARI": "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        },
+        "ruleBillingHome": {
+          "locationARI": "ari:cloud:jira-software::site/38191fa4-e340-4d5e-8f7d-33c8f6829dbd"
+        }
+      },
+      "writeAccessType": "OWNER_ONLY",
+      "collaborators": [],
+      "billingType": "NORMAL",
+      "partitionId": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "id": 6000000,
+      "idUuid": "6ef5f8c9-9e58-46dd-935c-27a9712eb705",
+      "description": ""
     },
     {
       "name": "Sääntö 2: GitHub issue edited → Päivitä Jira work item",
@@ -175,7 +201,33 @@
             }
           ]
         }
-      ]
+      ],
+      "clientKey": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "authorAccountId": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8",
+      "actor": {
+        "type": "ACCOUNT_ID",
+        "value": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8"
+      },
+      "ruleScope": {
+        "resources": [
+          "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        ]
+      },
+      "ruleHome": {
+        "ruleLifecycleHome": {
+          "locationARI": "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        },
+        "ruleBillingHome": {
+          "locationARI": "ari:cloud:jira-software::site/38191fa4-e340-4d5e-8f7d-33c8f6829dbd"
+        }
+      },
+      "writeAccessType": "OWNER_ONLY",
+      "collaborators": [],
+      "billingType": "NORMAL",
+      "partitionId": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "id": 6000001,
+      "idUuid": "da234e6e-3cb5-4445-96fe-c475f81378ca",
+      "description": ""
     },
     {
       "name": "Sääntö 3: GitHub issue closed → Transition work item → Done",
@@ -268,7 +320,33 @@
             }
           ]
         }
-      ]
+      ],
+      "clientKey": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "authorAccountId": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8",
+      "actor": {
+        "type": "ACCOUNT_ID",
+        "value": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8"
+      },
+      "ruleScope": {
+        "resources": [
+          "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        ]
+      },
+      "ruleHome": {
+        "ruleLifecycleHome": {
+          "locationARI": "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        },
+        "ruleBillingHome": {
+          "locationARI": "ari:cloud:jira-software::site/38191fa4-e340-4d5e-8f7d-33c8f6829dbd"
+        }
+      },
+      "writeAccessType": "OWNER_ONLY",
+      "collaborators": [],
+      "billingType": "NORMAL",
+      "partitionId": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "id": 6000002,
+      "idUuid": "86640f95-017b-4dc9-a163-0b1104a5800e",
+      "description": ""
     },
     {
       "name": "Sääntö 4: GitHub issue reopened → Transition work item → To Do",
@@ -361,7 +439,33 @@
             }
           ]
         }
-      ]
+      ],
+      "clientKey": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "authorAccountId": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8",
+      "actor": {
+        "type": "ACCOUNT_ID",
+        "value": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8"
+      },
+      "ruleScope": {
+        "resources": [
+          "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        ]
+      },
+      "ruleHome": {
+        "ruleLifecycleHome": {
+          "locationARI": "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        },
+        "ruleBillingHome": {
+          "locationARI": "ari:cloud:jira-software::site/38191fa4-e340-4d5e-8f7d-33c8f6829dbd"
+        }
+      },
+      "writeAccessType": "OWNER_ONLY",
+      "collaborators": [],
+      "billingType": "NORMAL",
+      "partitionId": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "id": 6000003,
+      "idUuid": "da69ef66-0ee3-44b0-b4c4-a4c20a376df1",
+      "description": ""
     },
     {
       "name": "Sääntö 5: GitHub issue labeled/unlabeled → Edit work item labels",
@@ -486,7 +590,33 @@
             }
           ]
         }
-      ]
+      ],
+      "clientKey": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "authorAccountId": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8",
+      "actor": {
+        "type": "ACCOUNT_ID",
+        "value": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8"
+      },
+      "ruleScope": {
+        "resources": [
+          "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        ]
+      },
+      "ruleHome": {
+        "ruleLifecycleHome": {
+          "locationARI": "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        },
+        "ruleBillingHome": {
+          "locationARI": "ari:cloud:jira-software::site/38191fa4-e340-4d5e-8f7d-33c8f6829dbd"
+        }
+      },
+      "writeAccessType": "OWNER_ONLY",
+      "collaborators": [],
+      "billingType": "NORMAL",
+      "partitionId": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "id": 6000004,
+      "idUuid": "5621d2a1-eca9-47f2-acbd-2a2d7fbaf086",
+      "description": ""
     },
     {
       "name": "Sääntö 8: GitHub issue comment created → Comment on work item",
@@ -594,7 +724,33 @@
             }
           ]
         }
-      ]
+      ],
+      "clientKey": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "authorAccountId": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8",
+      "actor": {
+        "type": "ACCOUNT_ID",
+        "value": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8"
+      },
+      "ruleScope": {
+        "resources": [
+          "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        ]
+      },
+      "ruleHome": {
+        "ruleLifecycleHome": {
+          "locationARI": "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        },
+        "ruleBillingHome": {
+          "locationARI": "ari:cloud:jira-software::site/38191fa4-e340-4d5e-8f7d-33c8f6829dbd"
+        }
+      },
+      "writeAccessType": "OWNER_ONLY",
+      "collaborators": [],
+      "billingType": "NORMAL",
+      "partitionId": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "id": 6000005,
+      "idUuid": "8c0ad9d3-ef0c-4857-ac95-7ece63ee47b5",
+      "description": ""
     }
   ]
 }
