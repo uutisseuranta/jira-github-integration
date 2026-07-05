@@ -6,7 +6,7 @@
   "_comment": "Tila: Suunniteltu (TODO). Milestoneja hallitaan vain GitHub-vetoisesti (L-009), joten sääntö ainoastaan hakee numeron GET-pyynnöllä ja tekee PATCH-päivityksen issuelle.",
   "trigger": {
     "component": "TRIGGER",
-    "type": "jira.trigger.field.changed",
+    "type": "jira.field.changed",
     "value": {
       "fields": [
         "fixVersions"

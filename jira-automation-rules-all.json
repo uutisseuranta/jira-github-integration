@@ -8,7 +8,7 @@
       "notifyOnError": "FIRSTERROR",
       "trigger": {
         "component": "TRIGGER",
-        "type": "jira.trigger.incoming.webhook",
+        "type": "jira.incoming.webhook",
         "value": {
           "webhookType": "NO_ISSUES"
         }
@@ -73,7 +73,7 @@
       "notifyOnError": "FIRSTERROR",
       "trigger": {
         "component": "TRIGGER",
-        "type": "jira.trigger.incoming.webhook",
+        "type": "jira.incoming.webhook",
         "value": {
           "webhookType": "NO_ISSUES"
         }
@@ -184,7 +184,7 @@
       "notifyOnError": "FIRSTERROR",
       "trigger": {
         "component": "TRIGGER",
-        "type": "jira.trigger.incoming.webhook",
+        "type": "jira.incoming.webhook",
         "value": {
           "webhookType": "NO_ISSUES"
         }
@@ -277,7 +277,7 @@
       "notifyOnError": "FIRSTERROR",
       "trigger": {
         "component": "TRIGGER",
-        "type": "jira.trigger.incoming.webhook",
+        "type": "jira.incoming.webhook",
         "value": {
           "webhookType": "NO_ISSUES"
         }
@@ -370,7 +370,7 @@
       "notifyOnError": "FIRSTERROR",
       "trigger": {
         "component": "TRIGGER",
-        "type": "jira.trigger.incoming.webhook",
+        "type": "jira.incoming.webhook",
         "value": {
           "webhookType": "NO_ISSUES"
         }
@@ -496,7 +496,7 @@
       "_comment": "Tila: Suunniteltu, ei toteutettu. projectId haetaan kerran: GET /rest/api/3/project/US → kenttä id.",
       "trigger": {
         "component": "TRIGGER",
-        "type": "jira.trigger.incoming.webhook",
+        "type": "jira.incoming.webhook",
         "value": {
           "webhookType": "NO_ISSUES"
         }
@@ -597,7 +597,7 @@
       "notifyOnError": "FIRSTERROR",
       "trigger": {
         "component": "TRIGGER",
-        "type": "jira.trigger.incoming.webhook",
+        "type": "jira.incoming.webhook",
         "value": {
           "webhookType": "NO_ISSUES"
         }
@@ -706,7 +706,7 @@
       "_comment": "Tila: Tuotannossa. Silmukkaesto: GitHub-puoli skipaa [Jira]-etuliitteellä alkavat kommentit (D-002). Label-poistologiikka poistettu (L-006).",
       "trigger": {
         "component": "TRIGGER",
-        "type": "jira.trigger.issue.transitioned",
+        "type": "jira.issue.transitioned",
         "value": {}
       },
       "components": [
@@ -786,7 +786,7 @@
       "_comment": "Tila: Suunniteltu (TODO). Label-poistologiikka poistettu (L-006).",
       "trigger": {
         "component": "TRIGGER",
-        "type": "jira.trigger.field.changed",
+        "type": "jira.field.changed",
         "value": {
           "fields": [
             "sprint"
@@ -845,7 +845,7 @@
       "_comment": "Tila: Suunniteltu (TODO). Silmukkaesto: skipataan jos summary alkaa [GitHub] — se on Sääntö 2:n kirjoittama.",
       "trigger": {
         "component": "TRIGGER",
-        "type": "jira.trigger.field.changed",
+        "type": "jira.field.changed",
         "value": {
           "fields": [
             "summary"
@@ -927,7 +927,7 @@
       "_comment": "Tila: Suunniteltu (TODO). Silmukkaesto: skipataan jos kommentti alkaa Git: — se on Sääntö 8:n kirjoittama.",
       "trigger": {
         "component": "TRIGGER",
-        "type": "jira.trigger.comment.added",
+        "type": "jira.comment.added",
         "value": {}
       },
       "components": [
@@ -1005,7 +1005,7 @@
       "_comment": "Tila: Suunniteltu (TODO). Milestoneja hallitaan vain GitHub-vetoisesti (L-009), joten sääntö ainoastaan hakee numeron GET-pyynnöllä ja tekee PATCH-päivityksen issuelle.",
       "trigger": {
         "component": "TRIGGER",
-        "type": "jira.trigger.field.changed",
+        "type": "jira.field.changed",
         "value": {
           "fields": [
             "fixVersions"

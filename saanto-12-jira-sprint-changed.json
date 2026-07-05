@@ -6,7 +6,7 @@
   "_comment": "Tila: Suunniteltu (TODO). Label-poistologiikka poistettu (L-006).",
   "trigger": {
     "component": "TRIGGER",
-    "type": "jira.trigger.field.changed",
+    "type": "jira.field.changed",
     "value": {
       "fields": [
         "sprint"

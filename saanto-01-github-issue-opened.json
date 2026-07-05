@@ -5,7 +5,7 @@
   "notifyOnError": "FIRSTERROR",
   "trigger": {
     "component": "TRIGGER",
-    "type": "jira.trigger.incoming.webhook",
+    "type": "jira.incoming.webhook",
     "value": {
       "webhookType": "NO_ISSUES"
     }

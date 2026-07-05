@@ -6,7 +6,7 @@
   "_comment": "Tila: Suunniteltu (TODO). Silmukkaesto: skipataan jos summary alkaa [GitHub] — se on Sääntö 2:n kirjoittama.",
   "trigger": {
     "component": "TRIGGER",
-    "type": "jira.trigger.field.changed",
+    "type": "jira.field.changed",
     "value": {
       "fields": [
         "summary"

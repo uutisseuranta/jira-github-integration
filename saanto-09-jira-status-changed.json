@@ -6,7 +6,7 @@
   "_comment": "Tila: Tuotannossa. Silmukkaesto: GitHub-puoli skipaa [Jira]-etuliitteellä alkavat kommentit (D-002). Label-poistologiikka poistettu (L-006).",
   "trigger": {
     "component": "TRIGGER",
-    "type": "jira.trigger.issue.transitioned",
+    "type": "jira.issue.transitioned",
     "value": {}
   },
   "components": [

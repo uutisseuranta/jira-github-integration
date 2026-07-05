@@ -6,7 +6,7 @@
   "_comment": "Tila: Suunniteltu (TODO). Silmukkaesto: skipataan jos kommentti alkaa Git: — se on Sääntö 8:n kirjoittama.",
   "trigger": {
     "component": "TRIGGER",
-    "type": "jira.trigger.comment.added",
+    "type": "jira.comment.added",
     "value": {}
   },
   "components": [

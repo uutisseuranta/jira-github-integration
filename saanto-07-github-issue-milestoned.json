@@ -6,7 +6,7 @@
   "_comment": "Tila: Suunniteltu, ei toteutettu. projectId haetaan kerran: GET /rest/api/3/project/US → kenttä id.",
   "trigger": {
     "component": "TRIGGER",
-    "type": "jira.trigger.incoming.webhook",
+    "type": "jira.incoming.webhook",
     "value": {
       "webhookType": "NO_ISSUES"
     }
