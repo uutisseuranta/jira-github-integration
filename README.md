@@ -138,7 +138,7 @@ Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtais
 2. Tuo JSON-flowt: **Jira settings → System → Automation flows → … → Import flows**
 3. Aktivoi tuodut flowt manuaalisesti (tulevat disabled-tilassa)
 4. Luo GitHub webhook: `Settings → Webhooks → Add webhook`
-   - **Payload URL:** `JIRA_WEBHOOK_URL`-secretin arvo (Jira Automation → saanto-01 → Incoming Webhook -osoite)
+   - **Payload URL:** Kopioi arvo `JIRA_WEBHOOK_URL`-secretistä — se on Jira Automation Incoming Webhook -osoite, jonka saat: Jira settings → Automation flows → avaa saanto-01 → trigger-kohta → **Incoming webhook URL**
    - **Content type:** `application/json`
    - **Secret:** `GITHUB_WEBHOOK_SECRET`-secretin arvo
    - **Events:** _Issues_ ja _Issue comments_
