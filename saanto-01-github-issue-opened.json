@@ -12,16 +12,6 @@
   },
   "components": [
     {
-      "component": "ACTION",
-      "type": "jira.lookup.issues",
-      "value": {
-        "query": {
-          "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
-        },
-        "variableName": "lookupIssues"
-      }
-    },
-    {
       "component": "CONDITION",
       "type": "jira.condition.container.block",
       "value": null,
@@ -37,25 +27,69 @@
               "component": "CONDITION",
               "type": "jira.comparator.condition",
               "value": {
-                "first": "{{lookupIssues.size}}",
+                "first": "{{webhookData.action}}",
                 "operator": "EQUALS",
-                "second": "0"
+                "second": "opened"
+              }
+            },
+            {
+              "component": "CONDITION",
+              "type": "jira.comparator.condition",
+              "value": {
+                "first": "{{webhookData.comment}}",
+                "operator": "IS_EMPTY",
+                "second": ""
               }
             },
             {
               "component": "ACTION",
-              "type": "jira.issue.create",
+              "type": "jira.lookup.issues",
               "value": {
-                "project": "US",
-                "issuetype": "Story",
-                "fields": {
-                  "summary": "Git: {{webhookData.issue.title}}",
-                  "description": "{{webhookData.issue.body}}",
-                  "customfield_10071": "{{webhookData.repository.name}}",
-                  "customfield_10072": "{{webhookData.issue.number}}",
-                  "customfield_10073": "{{webhookData.issue.html_url}}"
-                }
+                "query": {
+                  "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
+                },
+                "variableName": "lookupIssues"
               }
+            },
+            {
+              "component": "CONDITION",
+              "type": "jira.condition.container.block",
+              "value": null,
+              "children": [
+                {
+                  "component": "CONDITION_BLOCK",
+                  "type": "jira.condition.if.block",
+                  "value": {
+                    "conditionMatchType": "ALL"
+                  },
+                  "children": [
+                    {
+                      "component": "CONDITION",
+                      "type": "jira.comparator.condition",
+                      "value": {
+                        "first": "{{lookupIssues.size}}",
+                        "operator": "EQUALS",
+                        "second": "0"
+                      }
+                    },
+                    {
+                      "component": "ACTION",
+                      "type": "jira.issue.create",
+                      "value": {
+                        "project": "US",
+                        "issuetype": "Story",
+                        "fields": {
+                          "summary": "Git: {{webhookData.issue.title}}",
+                          "description": "{{webhookData.issue.body}}",
+                          "customfield_10071": "{{webhookData.repository.name}}",
+                          "customfield_10072": "{{webhookData.issue.number}}",
+                          "customfield_10073": "{{webhookData.issue.html_url}}"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
