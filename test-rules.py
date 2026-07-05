@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Automated validation tests for Jira Automation JSON rules.
+"""Jira Automation JSON -sääntöjen automaattiset validointitestit.
 
-Validates:
-1. JSON syntax and structure.
-2. Custom fields alignment (customfield_10071, 10072, 10073).
-3. Removal of label deletion logic (L-006).
-4. Correct use of prefix-based master title sync (L-002: Git: and Jira:).
+Validoi:
+1. JSON-syntaksin ja -rakenteen.
+2. Custom-kenttien yhdenmukaisuuden (customfield_10071, 10072, 10073).
+3. Label-poistologiikan poistamisen (päätös L-006).
+4. Etuliitepohjaisen otsikkosynkronoinnin oikean käytön (päätös L-002: Git: ja Jira:).
+
+Ajo: python -m pytest test-rules.py -v
+Viite: DECISION_LOG.csv, TECHNICAL_DESIGN.md
 """
 
 import os
@@ -14,9 +17,31 @@ import re
 import unittest
 
 class TestJiraRules(unittest.TestCase):
+    # Päivitä kun sääntöjä lisätään tai poistetaan — kirjaa myös DECISION_LOG.csv
+    # Intentionaalisesti puuttuvat numerot:
+    # saanto-06: ei käytössä (assignee-synkronointi poistettu, D-005)
+    # saanto-10: poistettu (D-005)
+    # saanto-11: poistettu (prioriteettisynkronointi poistettu, L-011)
+    EXPECTED_RULE_COUNT = 12  # 01-05, 07-09, 12-15
+
     def get_rule_files(self):
-        """Palauttaa kaikki sääntöihin liittyvät JSON-tiedostot."""
+        """Palauttaa kaikki sääntöihin liittyvät JSON-tiedostot hakemistosta."""
         return [f for f in os.listdir('.') if f.startswith('saanto-') and f.endswith('.json')]
+
+    def test_rule_count(self):
+        """Varmistaa, että löydettyjen sääntötiedostojen määrä vastaa EXPECTED_RULE_COUNT-vakiota.
+
+        Testi epäonnistuu jos sääntötiedostoja lisätään tai poistetaan ilman vakion päivitystä.
+        Tämä on regression guard -mekanismi konfiguraatiomuutoksille.
+        """
+        files = self.get_rule_files()
+        self.assertEqual(
+            len(files),
+            self.EXPECTED_RULE_COUNT,
+            f"Odotettiin {self.EXPECTED_RULE_COUNT} sääntöä, löytyi {len(files)}. "
+            f"Päivitä EXPECTED_RULE_COUNT tai tarkista puuttuvat/ylimääräiset tiedostot. "
+            f"Kirjaa myös muutos DECISION_LOG.csv:hen."
+        )
 
     def test_json_validity(self):
         """Varmistaa, että kaikki sääntötiedostot ovat valideja JSON-tiedostoja ja sisältävät perustiedot."""
@@ -35,15 +60,17 @@ class TestJiraRules(unittest.TestCase):
                     self.fail(f"Tiedoston {f} lataus epäonnistui: {e}")
 
     def test_custom_fields_consistency(self):
-        """Varmistaa, että käytetään vain organisaatiossa sovittuja ja konfiguroituja custom-kenttiä."""
+        """Varmistaa, että käytetään vain organisaatiossa sovittuja ja konfiguroituja custom-kenttiä.
+
+        Sallitut kentät on listattu TECHNICAL_DESIGN.md:ssä. Lisää sallittu kenttä allowed_fields
+        -joukkoon JA kirjaa päätös DECISION_LOG.csv:hen ennen kuin käytät uutta customfield-arvoa.
+        """
         allowed_fields = {"customfield_10071", "customfield_10072", "customfield_10073"}
         files = self.get_rule_files()
         for f in files:
             with self.subTest(file=f):
                 with open(f, 'r', encoding='utf-8') as fh:
                     content = fh.read()
-                
-                # Etsitään kaikki viittaukset customfield_XXXXX -muodossa
                 found_fields = set(re.findall(r'customfield_\d+', content))
                 invalid_fields = found_fields - allowed_fields
                 self.assertEqual(
@@ -52,10 +79,14 @@ class TestJiraRules(unittest.TestCase):
                 )
 
     def test_label_deletion_disabled(self):
-        """Varmistaa päätöksen L-006 mukaisesti, ettei säännöissä ole DELETE-kutsuja labeleille."""
+        """Varmistaa päätöksen L-006 mukaisesti, ettei säännöissä ole DELETE-kutsuja labeleille.
+
+        Vain status- ja sprint-muutossäännöt (09, 12) tarkistetaan, koska ne olivat
+        aiemmin virheellisesti käyttäneet DELETE-kutsua labelien poistoon.
+        """
         files = self.get_rule_files()
         for f in files:
-            # Säännöt 9 ja 12 ovat status/sprint muutoksia
+            # Tarkistetaan vain tiedostot joissa on aiemmin ollut DELETE-kutsuja
             if f in ['saanto-09-jira-status-changed.json', 'saanto-12-jira-sprint-changed.json']:
                 with self.subTest(file=f):
                     with open(f, 'r', encoding='utf-8') as fh:
@@ -65,19 +96,17 @@ class TestJiraRules(unittest.TestCase):
                         f"Tiedosto {f} sisältää kielletyn DELETE-kutsun labelille (päätös L-006)."
                     )
 
-    # Intentionaalisesti puuttuvat numerot (ks. DECISION_LOG.csv):
-    # saanto-06: ei käytössä (assignee-synkronointi poistettu D-005)
-    # saanto-10: poistettu (D-005)
-    # saanto-11: poistettu (prioriteettisynkronointi poistettu L-011)
-    EXPECTED_RULE_COUNT = 12  # 01-05, 07-09, 12-15
-
     def test_loop_prevention_comments(self):
-        """Varmistaa että saanto-08 ja saanto-14 kommenttisäännöt sisältävät yhteensopivat silmukkaestot (L-002)."""
+        """Varmistaa että saanto-08 ja saanto-14 kommenttisäännöt sisältävät yhteensopivat silmukkaestot.
+
+        Päätös L-002: saanto-08 käyttää etuliitettä 'Jira:' GitHub→Jira-suunnassa,
+        saanto-14 käyttää etuliitettä 'Git:' Jira→GitHub-suunnassa.
+        Ilman näitä tarkistuksia kommenttisynkronointi looppaisi loputtomasti.
+        """
         f8 = 'saanto-08-github-comment-created.json'
         if os.path.exists(f8):
             with open(f8, 'r', encoding='utf-8') as fh:
                 data = json.load(fh)
-            # Tarkistetaan NOT_STARTS_WITH ehto
             conditions = [c for c in data['components'] if c['component'] == 'CONDITION']
             has_loop_guard = False
             for cond in conditions:
@@ -99,8 +128,11 @@ class TestJiraRules(unittest.TestCase):
             self.assertTrue(has_loop_guard, f"{f14} ei sisällä silmukkaestoehtoa 'Git:'")
 
     def test_prefix_consistency(self):
-        """Varmistaa päätöksen L-002 mukaisesti otsikoiden uudet lyhyet etuliitteet (Git: ja Jira:)."""
-        # Sääntö 1 (luonti) ja Sääntö 2 (muokkaus) pitää kirjoittaa "Git: "
+        """Varmistaa päätöksen L-002 mukaisesti otsikoiden uudet lyhyet etuliitteet (Git: ja Jira:).
+
+        Vanhat etuliitteet '[GitHub]' ja '[Jira]' on korvattu lyhyemmillä muodoilla
+        jotta Jira Summary -kentän 255 merkin raja ei täyty (ks. DECISION_LOG.csv, L-002).
+        """
         for f in ['saanto-01-github-issue-opened.json', 'saanto-02-github-issue-edited.json']:
             if os.path.exists(f):
                 with self.subTest(file=f):
@@ -109,7 +141,6 @@ class TestJiraRules(unittest.TestCase):
                     self.assertIn('Git:', content, f"Tiedosto {f} ei käytä uutta 'Git:' etuliitettä.")
                     self.assertNotIn('[GitHub]', content, f"Tiedosto {f} käyttää vanhentunutta '[GitHub]' etuliitettä.")
 
-        # Sääntö 13 pitää kirjoittaa "Jira: "
         f13 = 'saanto-13-jira-summary-changed.json'
         if os.path.exists(f13):
             with self.subTest(file=f13):
