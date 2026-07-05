@@ -8,7 +8,7 @@ Automatisoitu kaksisuuntainen synkronointi GitHub Issuesin ja Jira-projektin vä
 
 Ennen kuin mikään toimii, lisää nämä **GitHub repository secretseihin** (`Settings → Secrets and variables → Actions`).
 
-Secretsejä voi hallinnoida myös **GitHub CLI:llä** — katso ohje kohdasta [Secrets-hallinta GitHub CLI:llä](#secrets-hallinta-github-clillä).
+GitHub Secretsejä **ei voi hallita Atlassian Rovo MCP Serverin kautta** — Rovo MCP on Atlassian-ekosysteemin työkalu (Jira, Confluence, Bitbucket), eikä sillä ole pääsyä GitHub-repositorion asetuksiin. Secrets-hallintaan käytetään joko **GitHub-käyttöliittymää** tai **GitHub CLI:tä**.
 
 | Secret | Kuvaus | Esimerkki |
 |--------|--------|--------|
@@ -20,19 +20,25 @@ Secretsejä voi hallinnoida myös **GitHub CLI:llä** — katso ohje kohdasta [S
 | `JIRA_WEBHOOK_URL` | Jira Automation Incoming Webhook URL | `https://api-private.atlassian.com/...` |
 | `JIRA_WEBHOOK_TOKEN` | Jira Automation Webhook Secret Token | `satunnainenavainabc123...` |
 
-> **HUOM:** Jos `JIRA_BASE_URL` tai `JIRA_WEBHOOK_URL` puuttuu, Actions-workflow tai rele-työkulku epäonnistuu/hyppää yli välittömästi. Nykyiset Jira Cloud -automaatiot vaativat tietoturvasyistä `JIRA_WEBHOOK_TOKEN` -salaisuuden `HTTP 400 (Missing token)` -virheiden välttämiseksi.
+> **HUOM:** Jos `JIRA_BASE_URL` tai `JIRA_WEBHOOK_URL` puuttuu, Actions-workflow tai rele-työkulu epäonnistuu/hyppää yli välittömästi. Nykyiset Jira Cloud -automaatiot vaativat tietoturvasyistä `JIRA_WEBHOOK_TOKEN` -salaisuuden `HTTP 400 (Missing token)` -virheiden välttämiseksi.
 
 ---
 
 ## Secrets-hallinta GitHub CLI:llä
 
-Secretsejä voi lisätä ja päivittää paikallisesti [GitHub CLI:llä](https://cli.github.com/) ilman selainkäyttöliittymää.
+Secretsejä voi lisätä ja päivittää paikallisesti [GitHub CLI:llä](https://cli.github.com/) ilman selainarvon näkymistä näytöllä.
 
-Aseta tai päivitä secret:
+GitHub CLI vaatii kirjautumisen:
+
+```bash
+gh auth login
+```
+
+Aseta tai päivitä secret interaktiivisesti (arvo ei jää shellin historiaan):
 
 ```bash
 gh secret set JIRA_API_TOKEN --repo uutisseuranta/jira-github-integration
-# CLI pyytää arvon interaktiivisesti (ei jää historiaan)
+# CLI pyytää arvon interaktiivisesti
 ```
 
 Tai suoraan (varo shellin historiaa):
@@ -47,7 +53,31 @@ Lista repon secretseistä (nimet näkyvät, arvot piilotettu):
 gh secret list --repo uutisseuranta/jira-github-integration
 ```
 
-> **HUOM:** GitHub CLI vaatii kirjautumisen (`gh auth login`) ja riittävät oikeudet repoon.
+---
+
+## Mitä Atlassian Rovo MCP Server tekee (ja mitä ei)
+
+**Rovo MCP Server** (`https://mcp.atlassian.com/v1/sse`) on Atlassianin virallinen remote MCP -palvelin, joka yhdistää Claude Coden, Cursorin tai VS Coden Atlassian-ekosysteemiin. Se autentikoidaan OAuth 2.1:llä tai API-tokenilla.
+
+**Rovo MCP voi:**
+- Lukea ja kirjoittaa **Jira-issuet** (getJiraIssue, createJiraIssue, editJiraIssue, transitionJiraIssue, searchJiraIssuesUsingJql)
+- Lukea ja kirjoittaa **Confluence-sivut** (getConfluencePage, createConfluencePage, updateConfluencePage)
+- Hakea tietoa **Bitbucket-repositorioista** (pull requestit, commitit, pipelinit)
+- Hallita **Compass-komponentteja**
+- Hakea yhteyksiä Teamwork Graphista (Jira ↔ Confluence ↔ PR:t ↔ deploymentit)
+
+**Rovo MCP EI voi:**
+- Hallita GitHub repository secretsejä
+- Muuttaa GitHub Actions -konfiguraatioita
+- Kirjoittaa tiedostoja GitHub-repositorioon (se onnistuu vain GitHub MCP Serverillä tai GitHub CLI:llä)
+
+Claude Coden yhdistäminen Atlassian Rovo MCP:hen:
+
+```bash
+claude mcp add --scope user --transport sse atlassian https://mcp.atlassian.com/v1/sse
+```
+
+Tämän jälkeen Claude Code avaa OAuth-kirjautumisikkunan selaimessa ja pyytää hyväksymään Jira/Confluence-oikeudet.
 
 ---
 
@@ -144,7 +174,7 @@ Tämä repositorio toimii uutisseuranta-organisaation keskitettynä integraatioh
 
 Otsikkosynkronointi on täysin kaksisuuntainen ja perustuu etuliitteisiin **`Git:`** ja **`Jira:`** (ilman hakasulkeita). Alkuperäinen luontipaikka määrittää tiketin master-järjestelmän: jos tiketti luodaan GitHubissa, se saa Jiraan etuliitteen `Git:`. Jira Automation tunnistaa tämän ja skippaa synkronoinnin takaisin GitHubiin, estäen ikuiset päivityssilmukat ilman viiveitä tai monimutkaista aritmetiikkaa (L-002).
 
-### 2. Automaattinen validointi (Test Coverage 100 %)
+### 2. Automaattinen validointi (Test Coverage 100 %)
 
 Kaikki JSON-muotoiset flowt (`saanto-*.json`) validoidaan automaattisesti jokaisessa PR- ja CI-ajossa Python-testiohjelmalla [`test-rules.py`](test-rules.py). Testit tarkistavat JSON-syntaksin, custom-kenttien käytön (`customfield_10071`–10073), etuliitteiden oikeellisuuden sekä varmistavat, ettei floweissa ole kiellettyjä label-poistoja (L-006).
 
