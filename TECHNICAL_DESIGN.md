@@ -77,6 +77,23 @@ Create work item / Transition work item / Comment on work item
 
 ---
 
+## Jira Cloud -yhteensopivuus ja tuetut toiminnot (Actions)
+
+Kaikki säännöissä käytettävät toiminnot (Actions) ja niiden tyypit on tarkistettu ja yhteensopivuus Jira Cloudin kanssa on dokumentoitu repositorion juuresta löytyvässä [jira-cloud-actions.json](file:///Users/jaakkokorhonen/uutisseuranta/jira-github-integration/jira-cloud-actions.json) -tiedostossa.
+
+Tässä integraatiossa käytettävät toiminnot ja niiden viralliset JSON-konfiguraatiotyypit:
+
+| Säännöissä käytetty tyyppi | Dokumentaation toiminto (Action) | Tila / Yhteensopivuus |
+| :--- | :--- | :--- |
+| **`jira.lookup.issues`** | *Lookup work items* (Hae tehtävät JQL:llä) | **Yhteensopiva** — korvannut on-premise legacy-tyypin `jira.issue.lookup`. |
+| **`jira.issue.create`** | *Create work item* (Luo tehtävä) | **Yhteensopiva** — standardi Jira Cloud -toiminto. |
+| **`jira.issue.edit`** | *Edit work item* (Muokkaa tehtävää) | **Yhteensopiva** — standardi Jira Cloud -toiminto. |
+| **`jira.issue.transition`** | *Transition work item* (Vaihda tehtävän tilaa) | **Yhteensopiva** — standardi Jira Cloud -toiminto. |
+| **`jira.issue.comment`** | *Comment on work item* (Kommentoi tehtävää) | **Yhteensopiva** — standardi Jira Cloud -toiminto. |
+| **`jira.send.webrequest`** | *Send web request* (Lähetä verkkopyyntö / webhook) | **Yhteensopiva** — korvannut vanhentuneet `jira.util.send.web.request` ja `jira.webrequest` tyypit. |
+
+---
+
 ## Tietomalli
 
 ### Jira custom -kentät (varmistettu MCP:llä 2026-07-03)
