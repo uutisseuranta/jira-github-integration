@@ -1,5 +1,7 @@
 # Jira–GitHub Integration
 
+[![CI](https://github.com/uutisseuranta/jira-github-integration/actions/workflows/lint-filenames.yml/badge.svg)](https://github.com/uutisseuranta/jira-github-integration/actions)
+
 Automatisoitu kaksisuuntainen synkronointi GitHub Issuesin ja Jira-projektin välillä.
 
 ---
@@ -102,6 +104,7 @@ Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtais
 | [`saanto-03-github-issue-closed.json`](saanto-03-github-issue-closed.json) | GitHub-issue suljettu → siirrä Jira-tila → Done |
 | [`saanto-04-github-issue-reopened.json`](saanto-04-github-issue-reopened.json) | GitHub-issue avattu uudelleen → siirrä Jira-tila → To Do |
 | [`saanto-05-github-issue-labeled.json`](saanto-05-github-issue-labeled.json) | GitHub-issue labeloitu/labelointi poistettu → päivitä Jira-labelit ja prioriteetti |
+| *`saanto-06`* | *Ei toteutettu — käyttötapausta ei tunnistettu (L-013)* |
 | [`saanto-07-github-issue-milestoned.json`](saanto-07-github-issue-milestoned.json) | GitHub-milestone muutettu → päivitä Jira fixVersions |
 | [`saanto-08-github-comment-created.json`](saanto-08-github-comment-created.json) | GitHub-kommentti lisätty → luo kommentti Jiraan (silmukkaesto: ohitetaan jos alkaa `[Jira]`) |
 | [`saanto-09-jira-status-changed.json`](saanto-09-jira-status-changed.json) | Jira-tila muutettu → päivitä GitHub-issuen tila |
@@ -154,8 +157,9 @@ Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtais
    - **Content type:** `application/json`
    - **Secret:** `GITHUB_WEBHOOK_SECRET`-secretin arvo
    - **Events:** _Issues_ ja _Issue comments_
+   > **Vinkki:** Payload URL löytyy: Jira Automation → saanto-01 → trigger-kohdan **Webhook URL** -linkki → kopioi koko osoite.
 5. Testaa luomalla GitHub-issue → tarkista että Jira-issue syntyy
-5b. Tai testaa manuaalisesti: `bash test-webhook.sh`
+   - Tai testaa manuaalisesti: `bash test-webhook.sh`
 
 ---
 
@@ -165,6 +169,7 @@ Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtais
 |---|---|---|
 | `HTTP 400 Missing token` | `JIRA_WEBHOOK_TOKEN`-secret puuttuu tai on väärin asetettu | Tarkista ja aseta secret: `gh secret set JIRA_WEBHOOK_TOKEN` |
 | `HTTP 401 Unauthorized` | `JIRA_API_TOKEN` on vanhentunut tai virheellinen | Luo uusi token [Atlassian-profiilissa](https://id.atlassian.com/manage-profile/security/api-tokens) ja päivitä secret |
+| `HTTP 403 / deploy epäonnistuu` | `GH_PAT` vanhentunut tai puuttuva `repo`-scope | Luo uusi PAT: GitHub → Settings → Developer settings → Personal access tokens |
 | Workflow skippattu kokonaan | `JIRA_BASE_URL` tai `JIRA_WEBHOOK_URL` puuttuu | Tarkista secretit: `gh secret list --repo uutisseuranta/jira-github-integration` |
 | Jira-tiketti ei synny | Saanto-01 on disabled-tilassa | Aktivoi flow: Jira settings → Automation flows → saanto-01 → Enable |
 | Workflow ei käynnisty | Webhook ei lähetä oikeita eventtejä | Tarkista webhook-asetuksista että _Issues_ ja _Issue comments_ on valittu |
