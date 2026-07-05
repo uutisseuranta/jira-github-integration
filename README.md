@@ -187,4 +187,4 @@ Otsikkosynkronointi on täysin kaksisuuntainen ja perustuu etuliitteisiin **`Git
 
 ### 2. Automaattinen validointi (Test Coverage 100 %)
 
-Kaikki JSON-muotoiset flowt (`saanto-*.json`) validoidaan automaattisesti jokaisessa PR- ja CI-ajossa Python-testiohjelmalla [`test-rules.py`](test-rules.py). Testit tarkistavat JSON-syntaksin, custom-kenttien käytön (`customfield_10071`–10073), etuliitteiden oikeellisuuden
+Kaikki JSON-muotoiset flowt (`saanto-*.json`) validoidaan automaattisesti jokaisessa PR- ja CI-ajossa Python-testiohjelmalla [`test-rules.py`](test-rules.py). Testit tarkistavat JSON-syntaksin, custom-kenttien käytön (`customfield_10071`–10073), etuliitteiden oikeellisuuden sekä silmukkaeston logiikan toimivuuden.
