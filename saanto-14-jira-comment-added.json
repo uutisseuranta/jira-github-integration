@@ -3,7 +3,7 @@
   "state": "DISABLED",
   "canOtherRuleTrigger": false,
   "notifyOnError": "FIRSTERROR",
-  "_comment": "Tila: Suunniteltu (TODO). Silmukkaesto: skipataan jos kommentti alkaa [GitHub] — se on Sääntö 8:n kirjoittama.",
+  "_comment": "Tila: Suunniteltu (TODO). Silmukkaesto: skipataan jos kommentti alkaa Git: — se on Sääntö 8:n kirjoittama.",
   "trigger": {
     "component": "TRIGGER",
     "type": "jira.trigger.comment.added",
@@ -31,7 +31,7 @@
           {
             "first": "{{comment.body}}",
             "operator": "NOT_STARTS_WITH",
-            "second": "[GitHub]"
+            "second": "Git:"
           }
         ],
         "operator": "AND"
@@ -48,7 +48,7 @@
           "Content-Type": "application/json"
         },
         "body": {
-          "body": "[Jira] {{comment.author.displayName}}: {{comment.body}}"
+          "body": "Jira: {{comment.author.displayName}}: {{comment.body}}"
         }
       }
     }

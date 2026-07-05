@@ -57,7 +57,7 @@
           {
             "first": "{{webhookData.comment.body}}",
             "operator": "NOT_STARTS_WITH",
-            "second": "[Jira]"
+            "second": "Jira:"
           }
         ],
         "operator": "AND"
@@ -68,7 +68,7 @@
       "type": "jira.issue.comment",
       "value": {
         "issueKey": "{{lookupIssues.first.key}}",
-        "comment": "[GitHub] @{{webhookData.comment.user.login}}: {{webhookData.comment.body}}"
+        "comment": "Git: @{{webhookData.comment.user.login}}: {{webhookData.comment.body}}"
       }
     }
   ]

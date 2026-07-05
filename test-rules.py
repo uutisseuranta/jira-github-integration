@@ -71,15 +71,32 @@ class TestJiraRules(unittest.TestCase):
     # saanto-11: poistettu (prioriteettisynkronointi poistettu L-011)
     EXPECTED_RULE_COUNT = 12  # 01-05, 07-09, 12-15
 
-    def test_loop_prevention_rule08(self):
-        """Varmistaa että saanto-08 sisältää silmukkaestoehdon ([Jira] tai Jira: etuliite)."""
-        f = 'saanto-08-github-comment-created.json'
-        if os.path.exists(f):
-            with open(f, 'r', encoding='utf-8') as fh:
-                content = fh.read()
-            # Ehdon on löydyttävä joko [Jira] tai Jira: etuliite skip-logiikkana
-            has_loop_guard = '[Jira]' in content or 'Jira:' in content
-            self.assertTrue(has_loop_guard, f"{f} ei sisällä silmukkaestoehtoa")
+    def test_loop_prevention_comments(self):
+        """Varmistaa että saanto-08 ja saanto-14 kommenttisäännöt sisältävät yhteensopivat silmukkaestot (L-002)."""
+        f8 = 'saanto-08-github-comment-created.json'
+        if os.path.exists(f8):
+            with open(f8, 'r', encoding='utf-8') as fh:
+                data = json.load(fh)
+            # Tarkistetaan NOT_STARTS_WITH ehto
+            conditions = [c for c in data['components'] if c['component'] == 'CONDITION']
+            has_loop_guard = False
+            for cond in conditions:
+                for sub_c in cond['value'].get('conditions', []):
+                    if sub_c.get('first') == '{{webhookData.comment.body}}' and sub_c.get('second') == 'Jira:':
+                        has_loop_guard = True
+            self.assertTrue(has_loop_guard, f"{f8} ei sisällä silmukkaestoehtoa 'Jira:'")
+
+        f14 = 'saanto-14-jira-comment-added.json'
+        if os.path.exists(f14):
+            with open(f14, 'r', encoding='utf-8') as fh:
+                data = json.load(fh)
+            conditions = [c for c in data['components'] if c['component'] == 'CONDITION']
+            has_loop_guard = False
+            for cond in conditions:
+                for sub_c in cond['value'].get('conditions', []):
+                    if sub_c.get('first') == '{{comment.body}}' and sub_c.get('second') == 'Git:':
+                        has_loop_guard = True
+            self.assertTrue(has_loop_guard, f"{f14} ei sisällä silmukkaestoehtoa 'Git:'")
 
     def test_prefix_consistency(self):
         """Varmistaa päätöksen L-002 mukaisesti otsikoiden uudet lyhyet etuliitteet (Git: ja Jira:)."""
