@@ -90,7 +90,17 @@ Tässä integraatiossa käytettävät toiminnot ja niiden viralliset JSON-konfig
 | **`jira.issue.edit`** | *Edit work item* (Muokkaa tehtävää) | **Yhteensopiva** — standardi Jira Cloud -toiminto. |
 | **`jira.issue.transition`** | *Transition work item* (Vaihda tehtävän tilaa) | **Yhteensopiva** — standardi Jira Cloud -toiminto. |
 | **`jira.issue.comment`** | *Comment on work item* (Kommentoi tehtävää) | **Yhteensopiva** — standardi Jira Cloud -toiminto. |
-| **`jira.web.request`** | *Send web request* (Lähetä verkkopyyntö / webhook) | **Yhteensopiva** — korvannut vanhentuneet `jira.util.send.web.request` ja `jira.webrequest` tyypit. |
+| **`jira.web.request`** | *Send web request* (Lähetä verkkopyyntö / webhook) | **Maksullinen (Paid-only)** — Ei käytettävissä Jira Cloud Free -tilillä. Vaatii vähintään Standard- tai Premium-lisenssin. |
+
+### Sääntöjen jakelu ja paketit
+
+Repositoriossa ylläpidetään kahta eri sääntöpakettia Jira Cloudiin tuontia varten:
+1. **[jira-automation-rules-free.json](file:///Users/jaakkokorhonen/uutisseuranta/jira-github-integration/jira-automation-rules-free.json)**:
+   * Sisältää ilmaisversio-yhteensopivat säännöt (**Säännöt 1, 2, 3, 4, 5a, 5b, 8**).
+   * Nämä säännöt suorittavat **GitHub → Jira** -integraation incoming webhooks -mekanismilla, joka on täysin ilmainen.
+   * Kaikki nämä säännöt on rikastettu käyttäjän kohde-Jiran `clientKey` ja `partitionId` -tunnisteilla ja uniikeilla webhook-tokeneilla valmiiksi konfliktittomaan asennukseen.
+2. **[jira-automation-rules-all.json](file:///Users/jaakkokorhonen/uutisseuranta/jira-github-integration/jira-automation-rules-all.json)**:
+   * Sisältää kaikki 12 sääntöä, mukaan lukien Jira → GitHub -synkronointisäännöt, jotka vaativat `jira.web.request`-toimintoja.
 
 ---
 
@@ -279,7 +289,12 @@ Condition: {{smart values}} condition
 
 ### Sääntö 5: GitHub issue labeled/unlabeled → Edit work item labels
 
-**Tila:** JSON v2 valmis, testattava
+**Tila:** Jaettu kahdeksi säännöksi Jira Cloudissa (5a ja 5b) tyyppimuunnosongelmien välttämiseksi.
+
+* **Sääntö 5a: GitHub issue labeled → Add Jira label**
+  * Lisää uuden labelin Jirassa `advancedFields` -päivityksellä (`"add": "{{webhookData.label.name}}"`).
+* **Sääntö 5b: GitHub issue unlabeled → Remove Jira label**
+  * Poistaa labelin Jirassa `advancedFields` -päivityksellä (`"remove": "{{webhookData.label.name}}"`).
 
 📄 [saanto-05-github-issue-labeled.json](https://github.com/uutisseuranta/jira-github-integration/blob/main/saanto-05-github-issue-labeled.json)
 
