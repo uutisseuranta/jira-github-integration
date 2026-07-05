@@ -12,48 +12,69 @@
   "components": [
     {
       "component": "CONDITION",
-      "type": "jira.condition.if",
-      "value": {
-        "conditions": [
-          {
-            "first": "{{issue.customfield_10072}}",
-            "operator": "IS_NOT_EMPTY"
-          }
-        ],
-        "operator": "AND"
-      }
-    },
-    {
-      "component": "CONDITION",
-      "type": "jira.condition.if",
-      "_comment": "Sulkee GitHub-issuen kun Jira-status on Done; avaa uudelleen muilla transitioilla.",
-      "value": {
-        "conditions": [
-          {
-            "first": "{{issue.status.name}}",
-            "operator": "IN",
-            "second": "Done,In Progress,To Do,In Review"
-          }
-        ],
-        "operator": "AND"
-      }
-    },
-    {
-      "component": "ACTION",
-      "type": "jira.util.send.web.request",
-      "_comment": "PATCH GitHub issue state: Done → closed (completed), muut → open. Silmukkaesto: tämä ei triggeröi Sääntöä 1 koska GitHub-issue-eventit ovat eri webhook-kanava kuin Jira-automation.",
-      "value": {
-        "method": "PATCH",
-        "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
-        "headers": {
-          "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
-          "Content-Type": "application/json"
-        },
-        "body": {
-          "state": "{{#if issue.status.name == 'Done'}}closed{{else}}open{{/if}}",
-          "state_reason": "{{#if issue.status.name == 'Done'}}completed{{/if}}"
+      "type": "jira.condition.container.block",
+      "value": null,
+      "children": [
+        {
+          "component": "CONDITION_BLOCK",
+          "type": "jira.condition.if.block",
+          "value": {
+            "conditionMatchType": "ALL"
+          },
+          "children": [
+            {
+              "component": "CONDITION",
+              "type": "jira.comparator.condition",
+              "value": {
+                "first": "{{issue.customfield_10072}}",
+                "operator": "IS_NOT_EMPTY"
+              }
+            },
+            {
+              "component": "CONDITION",
+              "type": "jira.condition.container.block",
+              "value": null,
+              "children": [
+                {
+                  "component": "CONDITION_BLOCK",
+                  "type": "jira.condition.if.block",
+                  "value": {
+                    "conditionMatchType": "ALL"
+                  },
+                  "children": [
+                    {
+                      "component": "CONDITION",
+                      "type": "jira.comparator.condition",
+                      "value": {
+                        "first": "{{issue.status.name}}",
+                        "operator": "REGEX_MATCHES",
+                        "second": "^(Done|In Progress|To Do|In Review)$"
+                      }
+                    },
+                    {
+                      "component": "ACTION",
+                      "type": "jira.webrequest",
+                      "_comment": "PATCH GitHub issue state: Done → closed (completed), muut → open. Silmukkaesto: tämä ei triggeröi Sääntöä 1 koska GitHub-issue-eventit ovat eri webhook-kanava kuin Jira-automation.",
+                      "value": {
+                        "method": "PATCH",
+                        "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
+                        "headers": {
+                          "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
+                          "Content-Type": "application/json"
+                        },
+                        "body": {
+                          "state": "{{#if issue.status.name == 'Done'}}closed{{else}}open{{/if}}",
+                          "state_reason": "{{#if issue.status.name == 'Done'}}completed{{/if}}"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
-      }
+      ]
     }
   ]
 }

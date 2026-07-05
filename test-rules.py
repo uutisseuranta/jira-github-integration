@@ -103,29 +103,51 @@ class TestJiraRules(unittest.TestCase):
         saanto-14 käyttää etuliitettä 'Git:' Jira→GitHub-suunnassa.
         Ilman näitä tarkistuksia kommenttisynkronointi looppaisi loputtomasti.
         """
+        def find_compare_conditions(comp):
+            conds = []
+            if not isinstance(comp, dict):
+                return conds
+            if comp.get("component") == "CONDITION" and comp.get("type") == "jira.comparator.condition":
+                conds.append(comp)
+            for key in ["components", "children"]:
+                if key in comp:
+                    for child in comp[key]:
+                        conds.extend(find_compare_conditions(child))
+            return conds
+
         f8 = 'saanto-08-github-comment-created.json'
         if os.path.exists(f8):
             with open(f8, 'r', encoding='utf-8') as fh:
                 data = json.load(fh)
-            conditions = [c for c in data['components'] if c['component'] == 'CONDITION']
+            
+            compare_conds = []
+            if "components" in data:
+                for comp in data["components"]:
+                    compare_conds.extend(find_compare_conditions(comp))
+                    
             has_loop_guard = False
-            for cond in conditions:
-                for sub_c in cond['value'].get('conditions', []):
-                    if sub_c.get('first') == '{{webhookData.comment.body}}' and sub_c.get('second') == 'Jira:':
-                        has_loop_guard = True
-            self.assertTrue(has_loop_guard, f"{f8} ei sisällä silmukkaestoehtoa 'Jira:'")
+            for cond in compare_conds:
+                val = cond.get("value", {})
+                if val.get("first") == "{{webhookData.comment.body}}" and val.get("second") == "^Jira:":
+                    has_loop_guard = True
+            self.assertTrue(has_loop_guard, f"{f8} ei sisällä silmukkaestoehtoa '^Jira:'")
 
         f14 = 'saanto-14-jira-comment-added.json'
         if os.path.exists(f14):
             with open(f14, 'r', encoding='utf-8') as fh:
                 data = json.load(fh)
-            conditions = [c for c in data['components'] if c['component'] == 'CONDITION']
+                
+            compare_conds = []
+            if "components" in data:
+                for comp in data["components"]:
+                    compare_conds.extend(find_compare_conditions(comp))
+                    
             has_loop_guard = False
-            for cond in conditions:
-                for sub_c in cond['value'].get('conditions', []):
-                    if sub_c.get('first') == '{{comment.body}}' and sub_c.get('second') == 'Git:':
-                        has_loop_guard = True
-            self.assertTrue(has_loop_guard, f"{f14} ei sisällä silmukkaestoehtoa 'Git:'")
+            for cond in compare_conds:
+                val = cond.get("value", {})
+                if val.get("first") == "{{comment.body}}" and val.get("second") == "^Git:":
+                    has_loop_guard = True
+            self.assertTrue(has_loop_guard, f"{f14} ei sisällä silmukkaestoehtoa '^Git:'")
 
     def test_prefix_consistency(self):
         """Varmistaa päätöksen L-002 mukaisesti otsikoiden uudet lyhyet etuliitteet (Git: ja Jira:).

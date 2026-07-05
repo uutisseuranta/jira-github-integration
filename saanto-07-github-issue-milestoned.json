@@ -14,67 +14,89 @@
   "components": [
     {
       "component": "CONDITION",
-      "type": "jira.condition.if",
-      "value": {
-        "conditions": [
-          {
-            "first": "{{webhookData.action}}",
-            "operator": "IN",
-            "second": "milestoned,demilestoned"
-          }
-        ],
-        "operator": "AND"
-      }
-    },
-    {
-      "component": "ACTION",
-      "type": "jira.lookup.issues",
-      "value": {
-        "query": {
-          "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
-        },
-        "variableName": "lookupIssues"
-      }
-    },
-    {
-      "component": "CONDITION",
-      "type": "jira.condition.if",
-      "value": {
-        "conditions": [
-          {
-            "first": "{{lookupIssues.size}}",
-            "operator": "GREATER_THAN",
-            "second": "0"
-          }
-        ],
-        "operator": "AND"
-      }
-    },
-    {
-      "component": "ACTION",
-      "type": "jira.issue.edit",
-      "value": {
-        "issueKey": "{{lookupIssues.first.key}}",
-        "fields": {
-          "fixVersions": "{{webhookData.issue.milestone.title}}"
+      "type": "jira.condition.container.block",
+      "value": null,
+      "children": [
+        {
+          "component": "CONDITION_BLOCK",
+          "type": "jira.condition.if.block",
+          "value": {
+            "conditionMatchType": "ALL"
+          },
+          "children": [
+            {
+              "component": "CONDITION",
+              "type": "jira.comparator.condition",
+              "value": {
+                "first": "{{webhookData.action}}",
+                "operator": "REGEX_MATCHES",
+                "second": "^(milestoned|demilestoned)$"
+              }
+            },
+            {
+              "component": "ACTION",
+              "type": "jira.lookup.issues",
+              "value": {
+                "query": {
+                  "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
+                },
+                "variableName": "lookupIssues"
+              }
+            },
+            {
+              "component": "CONDITION",
+              "type": "jira.condition.container.block",
+              "value": null,
+              "children": [
+                {
+                  "component": "CONDITION_BLOCK",
+                  "type": "jira.condition.if.block",
+                  "value": {
+                    "conditionMatchType": "ALL"
+                  },
+                  "children": [
+                    {
+                      "component": "CONDITION",
+                      "type": "jira.comparator.condition",
+                      "value": {
+                        "first": "{{lookupIssues.size}}",
+                        "operator": "GREATER_THAN",
+                        "second": "0"
+                      }
+                    },
+                    {
+                      "component": "ACTION",
+                      "type": "jira.issue.edit",
+                      "value": {
+                        "issueKey": "{{lookupIssues.first.key}}",
+                        "fields": {
+                          "fixVersions": "{{webhookData.issue.milestone.title}}"
+                        }
+                      }
+                    },
+                    {
+                      "component": "ACTION",
+                      "type": "jira.webrequest",
+                      "value": {
+                        "method": "POST",
+                        "url": "https://uutisseuranta.atlassian.net/rest/api/3/version",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "body": {
+                          "name": "{{webhookData.issue.milestone.title}}",
+                          "releaseDate": "{{webhookData.issue.milestone.due_on}}",
+                          "projectId": "<HAETTAVA: GET /rest/api/3/project/US → id>"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
-      }
-    },
-    {
-      "component": "ACTION",
-      "type": "jira.util.send.web.request",
-      "value": {
-        "method": "POST",
-        "url": "https://uutisseuranta.atlassian.net/rest/api/3/version",
-        "headers": {
-          "Content-Type": "application/json"
-        },
-        "body": {
-          "name": "{{webhookData.issue.milestone.title}}",
-          "releaseDate": "{{webhookData.issue.milestone.due_on}}",
-          "projectId": "<HAETTAVA: GET /rest/api/3/project/US → id>"
-        }
-      }
+      ]
     }
   ]
 }

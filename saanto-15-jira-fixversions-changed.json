@@ -8,49 +8,62 @@
     "component": "TRIGGER",
     "type": "jira.trigger.field.changed",
     "value": {
-      "fields": ["fixVersions"]
+      "fields": [
+        "fixVersions"
+      ]
     }
   },
   "components": [
     {
       "component": "CONDITION",
-      "type": "jira.condition.if",
-      "value": {
-        "conditions": [
-          {
-            "first": "{{issue.customfield_10072}}",
-            "operator": "IS_NOT_EMPTY"
-          }
-        ],
-        "operator": "AND"
-      }
-    },
-    {
-      "component": "ACTION",
-      "type": "jira.util.send.web.request",
-      "value": {
-        "method": "GET",
-        "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/milestones",
-        "headers": {
-          "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
-          "Content-Type": "application/json"
+      "type": "jira.condition.container.block",
+      "value": null,
+      "children": [
+        {
+          "component": "CONDITION_BLOCK",
+          "type": "jira.condition.if.block",
+          "value": {
+            "conditionMatchType": "ALL"
+          },
+          "children": [
+            {
+              "component": "CONDITION",
+              "type": "jira.comparator.condition",
+              "value": {
+                "first": "{{issue.customfield_10072}}",
+                "operator": "IS_NOT_EMPTY"
+              }
+            },
+            {
+              "component": "ACTION",
+              "type": "jira.webrequest",
+              "value": {
+                "method": "GET",
+                "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/milestones",
+                "headers": {
+                  "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
+                  "Content-Type": "application/json"
+                }
+              }
+            },
+            {
+              "component": "ACTION",
+              "type": "jira.webrequest",
+              "value": {
+                "method": "PATCH",
+                "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
+                "headers": {
+                  "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "milestone": "{{webhookResponse.body.find(x => x.title == issue.fixVersions.first.name).number}}"
+                }
+              }
+            }
+          ]
         }
-      }
-    },
-    {
-      "component": "ACTION",
-      "type": "jira.util.send.web.request",
-      "value": {
-        "method": "PATCH",
-        "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
-        "headers": {
-          "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
-          "Content-Type": "application/json"
-        },
-        "body": {
-          "milestone": "{{webhookResponse.body.find(x => x.title == issue.fixVersions.first.name).number}}"
-        }
-      }
+      ]
     }
   ]
 }

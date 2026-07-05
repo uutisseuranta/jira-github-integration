@@ -25,32 +25,43 @@
         },
         {
           "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{lookupIssues.size}}",
-                "operator": "EQUALS",
-                "second": "0"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.issue.create",
-          "value": {
-            "project": "US",
-            "issuetype": "Story",
-            "fields": {
-              "summary": "Git: {{webhookData.issue.title}}",
-              "description": "{{webhookData.issue.body}}",
-              "customfield_10071": "{{webhookData.repository.name}}",
-              "customfield_10072": "{{webhookData.issue.number}}",
-              "customfield_10073": "{{webhookData.issue.html_url}}"
+          "type": "jira.condition.container.block",
+          "value": null,
+          "children": [
+            {
+              "component": "CONDITION_BLOCK",
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "component": "CONDITION",
+                  "type": "jira.comparator.condition",
+                  "value": {
+                    "first": "{{lookupIssues.size}}",
+                    "operator": "EQUALS",
+                    "second": "0"
+                  }
+                },
+                {
+                  "component": "ACTION",
+                  "type": "jira.issue.create",
+                  "value": {
+                    "project": "US",
+                    "issuetype": "Story",
+                    "fields": {
+                      "summary": "Git: {{webhookData.issue.title}}",
+                      "description": "{{webhookData.issue.body}}",
+                      "customfield_10071": "{{webhookData.repository.name}}",
+                      "customfield_10072": "{{webhookData.issue.number}}",
+                      "customfield_10073": "{{webhookData.issue.html_url}}"
+                    }
+                  }
+                }
+              ]
             }
-          }
+          ]
         }
       ]
     },
@@ -69,66 +80,99 @@
       "components": [
         {
           "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{webhookData.action}}",
-                "operator": "EQUALS",
-                "second": "edited"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{webhookData.issue.title}}",
-                "operator": "NOT_STARTS_WITH",
-                "second": "Jira:"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.lookup.issues",
-          "value": {
-            "query": {
-              "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
-            },
-            "variableName": "lookupIssues"
-          }
-        },
-        {
-          "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{lookupIssues.size}}",
-                "operator": "GREATER_THAN",
-                "second": "0"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.issue.edit",
-          "value": {
-            "issueKey": "{{lookupIssues.first.key}}",
-            "fields": {
-              "summary": "Git: {{webhookData.issue.title}}",
-              "description": "{{webhookData.issue.body}}"
+          "type": "jira.condition.container.block",
+          "value": null,
+          "children": [
+            {
+              "component": "CONDITION_BLOCK",
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "component": "CONDITION",
+                  "type": "jira.comparator.condition",
+                  "value": {
+                    "first": "{{webhookData.action}}",
+                    "operator": "EQUALS",
+                    "second": "edited"
+                  }
+                },
+                {
+                  "component": "CONDITION",
+                  "type": "jira.condition.container.block",
+                  "value": null,
+                  "children": [
+                    {
+                      "component": "CONDITION_BLOCK",
+                      "type": "jira.condition.if.block",
+                      "value": {
+                        "conditionMatchType": "ALL"
+                      },
+                      "children": [
+                        {
+                          "component": "CONDITION",
+                          "type": "jira.comparator.condition",
+                          "value": {
+                            "first": "{{webhookData.issue.title}}",
+                            "operator": "REGEX_NOT_MATCHES",
+                            "second": "^Jira:"
+                          }
+                        },
+                        {
+                          "component": "ACTION",
+                          "type": "jira.lookup.issues",
+                          "value": {
+                            "query": {
+                              "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
+                            },
+                            "variableName": "lookupIssues"
+                          }
+                        },
+                        {
+                          "component": "CONDITION",
+                          "type": "jira.condition.container.block",
+                          "value": null,
+                          "children": [
+                            {
+                              "component": "CONDITION_BLOCK",
+                              "type": "jira.condition.if.block",
+                              "value": {
+                                "conditionMatchType": "ALL"
+                              },
+                              "children": [
+                                {
+                                  "component": "CONDITION",
+                                  "type": "jira.comparator.condition",
+                                  "value": {
+                                    "first": "{{lookupIssues.size}}",
+                                    "operator": "GREATER_THAN",
+                                    "second": "0"
+                                  }
+                                },
+                                {
+                                  "component": "ACTION",
+                                  "type": "jira.issue.edit",
+                                  "value": {
+                                    "issueKey": "{{lookupIssues.first.key}}",
+                                    "fields": {
+                                      "summary": "Git: {{webhookData.issue.title}}",
+                                      "description": "{{webhookData.issue.body}}"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
-          }
+          ]
         }
       ]
     },
@@ -147,59 +191,81 @@
       "components": [
         {
           "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{webhookData.action}}",
-                "operator": "EQUALS",
-                "second": "closed"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.lookup.issues",
-          "value": {
-            "query": {
-              "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
-            },
-            "variableName": "lookupIssues"
-          }
-        },
-        {
-          "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{lookupIssues.size}}",
-                "operator": "GREATER_THAN",
-                "second": "0"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.issue.transition",
-          "value": {
-            "issueKey": "{{lookupIssues.first.key}}",
-            "to": "Done"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.issue.edit",
-          "value": {
-            "issueKey": "{{lookupIssues.first.key}}",
-            "fields": {
-              "resolution": "{{#if webhookData.issue.state_reason == 'completed'}}Fixed{{else if webhookData.issue.state_reason == 'not_planned'}}Won't Do{{else if webhookData.issue.state_reason == 'duplicate'}}Duplicate{{else}}Fixed{{/if}}"
+          "type": "jira.condition.container.block",
+          "value": null,
+          "children": [
+            {
+              "component": "CONDITION_BLOCK",
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "component": "CONDITION",
+                  "type": "jira.comparator.condition",
+                  "value": {
+                    "first": "{{webhookData.action}}",
+                    "operator": "EQUALS",
+                    "second": "closed"
+                  }
+                },
+                {
+                  "component": "ACTION",
+                  "type": "jira.lookup.issues",
+                  "value": {
+                    "query": {
+                      "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
+                    },
+                    "variableName": "lookupIssues"
+                  }
+                },
+                {
+                  "component": "CONDITION",
+                  "type": "jira.condition.container.block",
+                  "value": null,
+                  "children": [
+                    {
+                      "component": "CONDITION_BLOCK",
+                      "type": "jira.condition.if.block",
+                      "value": {
+                        "conditionMatchType": "ALL"
+                      },
+                      "children": [
+                        {
+                          "component": "CONDITION",
+                          "type": "jira.comparator.condition",
+                          "value": {
+                            "first": "{{lookupIssues.size}}",
+                            "operator": "GREATER_THAN",
+                            "second": "0"
+                          }
+                        },
+                        {
+                          "component": "ACTION",
+                          "type": "jira.issue.transition",
+                          "value": {
+                            "issueKey": "{{lookupIssues.first.key}}",
+                            "to": "Done"
+                          }
+                        },
+                        {
+                          "component": "ACTION",
+                          "type": "jira.issue.edit",
+                          "value": {
+                            "issueKey": "{{lookupIssues.first.key}}",
+                            "fields": {
+                              "resolution": "{{#if webhookData.issue.state_reason == 'completed'}}Fixed{{else if webhookData.issue.state_reason == 'not_planned'}}Won't Do{{else if webhookData.issue.state_reason == 'duplicate'}}Duplicate{{else}}Fixed{{/if}}"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
-          }
+          ]
         }
       ]
     },
@@ -218,59 +284,81 @@
       "components": [
         {
           "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{webhookData.action}}",
-                "operator": "EQUALS",
-                "second": "reopened"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.lookup.issues",
-          "value": {
-            "query": {
-              "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
-            },
-            "variableName": "lookupIssues"
-          }
-        },
-        {
-          "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{lookupIssues.size}}",
-                "operator": "GREATER_THAN",
-                "second": "0"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.issue.edit",
-          "value": {
-            "issueKey": "{{lookupIssues.first.key}}",
-            "fields": {
-              "resolution": null
+          "type": "jira.condition.container.block",
+          "value": null,
+          "children": [
+            {
+              "component": "CONDITION_BLOCK",
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "component": "CONDITION",
+                  "type": "jira.comparator.condition",
+                  "value": {
+                    "first": "{{webhookData.action}}",
+                    "operator": "EQUALS",
+                    "second": "reopened"
+                  }
+                },
+                {
+                  "component": "ACTION",
+                  "type": "jira.lookup.issues",
+                  "value": {
+                    "query": {
+                      "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
+                    },
+                    "variableName": "lookupIssues"
+                  }
+                },
+                {
+                  "component": "CONDITION",
+                  "type": "jira.condition.container.block",
+                  "value": null,
+                  "children": [
+                    {
+                      "component": "CONDITION_BLOCK",
+                      "type": "jira.condition.if.block",
+                      "value": {
+                        "conditionMatchType": "ALL"
+                      },
+                      "children": [
+                        {
+                          "component": "CONDITION",
+                          "type": "jira.comparator.condition",
+                          "value": {
+                            "first": "{{lookupIssues.size}}",
+                            "operator": "GREATER_THAN",
+                            "second": "0"
+                          }
+                        },
+                        {
+                          "component": "ACTION",
+                          "type": "jira.issue.edit",
+                          "value": {
+                            "issueKey": "{{lookupIssues.first.key}}",
+                            "fields": {
+                              "resolution": null
+                            }
+                          }
+                        },
+                        {
+                          "component": "ACTION",
+                          "type": "jira.issue.transition",
+                          "value": {
+                            "issueKey": "{{lookupIssues.first.key}}",
+                            "to": "To Do"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.issue.transition",
-          "value": {
-            "issueKey": "{{lookupIssues.first.key}}",
-            "to": "To Do"
-          }
+          ]
         }
       ]
     },
@@ -289,80 +377,113 @@
       "components": [
         {
           "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{webhookData.action}}",
-                "operator": "IN",
-                "second": "labeled,unlabeled"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.lookup.issues",
-          "value": {
-            "query": {
-              "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
-            },
-            "variableName": "lookupIssues"
-          }
-        },
-        {
-          "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{lookupIssues.size}}",
-                "operator": "GREATER_THAN",
-                "second": "0"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.issue.edit",
-          "value": {
-            "issueKey": "{{lookupIssues.first.key}}",
-            "fields": {
-              "labels": {
-                "operation": "{{#if webhookData.action == 'labeled'}}add{{else}}remove{{/if}}",
-                "value": "{{webhookData.label.name}}"
-              }
+          "type": "jira.condition.container.block",
+          "value": null,
+          "children": [
+            {
+              "component": "CONDITION_BLOCK",
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "component": "CONDITION",
+                  "type": "jira.comparator.condition",
+                  "value": {
+                    "first": "{{webhookData.action}}",
+                    "operator": "REGEX_MATCHES",
+                    "second": "^(labeled|unlabeled)$"
+                  }
+                },
+                {
+                  "component": "ACTION",
+                  "type": "jira.lookup.issues",
+                  "value": {
+                    "query": {
+                      "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
+                    },
+                    "variableName": "lookupIssues"
+                  }
+                },
+                {
+                  "component": "CONDITION",
+                  "type": "jira.condition.container.block",
+                  "value": null,
+                  "children": [
+                    {
+                      "component": "CONDITION_BLOCK",
+                      "type": "jira.condition.if.block",
+                      "value": {
+                        "conditionMatchType": "ALL"
+                      },
+                      "children": [
+                        {
+                          "component": "CONDITION",
+                          "type": "jira.comparator.condition",
+                          "value": {
+                            "first": "{{lookupIssues.size}}",
+                            "operator": "GREATER_THAN",
+                            "second": "0"
+                          }
+                        },
+                        {
+                          "component": "ACTION",
+                          "type": "jira.issue.edit",
+                          "value": {
+                            "issueKey": "{{lookupIssues.first.key}}",
+                            "fields": {
+                              "labels": {
+                                "operation": "{{#if webhookData.action == 'labeled'}}add{{else}}remove{{/if}}",
+                                "value": "{{webhookData.label.name}}"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "component": "CONDITION",
+                          "type": "jira.condition.container.block",
+                          "value": null,
+                          "children": [
+                            {
+                              "component": "CONDITION_BLOCK",
+                              "type": "jira.condition.if.block",
+                              "value": {
+                                "conditionMatchType": "ALL"
+                              },
+                              "children": [
+                                {
+                                  "component": "CONDITION",
+                                  "type": "jira.comparator.condition",
+                                  "value": {
+                                    "first": "{{webhookData.label.name}}",
+                                    "operator": "STARTS_WITH",
+                                    "second": "priority:"
+                                  }
+                                },
+                                {
+                                  "component": "ACTION",
+                                  "type": "jira.issue.edit",
+                                  "value": {
+                                    "issueKey": "{{lookupIssues.first.key}}",
+                                    "fields": {
+                                      "priority": {
+                                        "name": "{{#if webhookData.label.name == 'priority:high'}}High{{else if webhookData.label.name == 'priority:medium'}}Medium{{else if webhookData.label.name == 'priority:low'}}Low{{else if webhookData.label.name == 'priority:lowest'}}Lowest{{/if}}"
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
-          }
-        },
-        {
-          "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{webhookData.label.name}}",
-                "operator": "STARTS_WITH",
-                "second": "priority:"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.issue.edit",
-          "value": {
-            "issueKey": "{{lookupIssues.first.key}}",
-            "fields": {
-              "priority": {
-                "name": "{{#if webhookData.label.name == 'priority:high'}}High{{else if webhookData.label.name == 'priority:medium'}}Medium{{else if webhookData.label.name == 'priority:low'}}Low{{else if webhookData.label.name == 'priority:lowest'}}Lowest{{/if}}"
-              }
-            }
-          }
+          ]
         }
       ]
     },
@@ -382,67 +503,89 @@
       "components": [
         {
           "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{webhookData.action}}",
-                "operator": "IN",
-                "second": "milestoned,demilestoned"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.lookup.issues",
-          "value": {
-            "query": {
-              "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
-            },
-            "variableName": "lookupIssues"
-          }
-        },
-        {
-          "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{lookupIssues.size}}",
-                "operator": "GREATER_THAN",
-                "second": "0"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.issue.edit",
-          "value": {
-            "issueKey": "{{lookupIssues.first.key}}",
-            "fields": {
-              "fixVersions": "{{webhookData.issue.milestone.title}}"
+          "type": "jira.condition.container.block",
+          "value": null,
+          "children": [
+            {
+              "component": "CONDITION_BLOCK",
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "component": "CONDITION",
+                  "type": "jira.comparator.condition",
+                  "value": {
+                    "first": "{{webhookData.action}}",
+                    "operator": "REGEX_MATCHES",
+                    "second": "^(milestoned|demilestoned)$"
+                  }
+                },
+                {
+                  "component": "ACTION",
+                  "type": "jira.lookup.issues",
+                  "value": {
+                    "query": {
+                      "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
+                    },
+                    "variableName": "lookupIssues"
+                  }
+                },
+                {
+                  "component": "CONDITION",
+                  "type": "jira.condition.container.block",
+                  "value": null,
+                  "children": [
+                    {
+                      "component": "CONDITION_BLOCK",
+                      "type": "jira.condition.if.block",
+                      "value": {
+                        "conditionMatchType": "ALL"
+                      },
+                      "children": [
+                        {
+                          "component": "CONDITION",
+                          "type": "jira.comparator.condition",
+                          "value": {
+                            "first": "{{lookupIssues.size}}",
+                            "operator": "GREATER_THAN",
+                            "second": "0"
+                          }
+                        },
+                        {
+                          "component": "ACTION",
+                          "type": "jira.issue.edit",
+                          "value": {
+                            "issueKey": "{{lookupIssues.first.key}}",
+                            "fields": {
+                              "fixVersions": "{{webhookData.issue.milestone.title}}"
+                            }
+                          }
+                        },
+                        {
+                          "component": "ACTION",
+                          "type": "jira.webrequest",
+                          "value": {
+                            "method": "POST",
+                            "url": "https://uutisseuranta.atlassian.net/rest/api/3/version",
+                            "headers": {
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "name": "{{webhookData.issue.milestone.title}}",
+                              "releaseDate": "{{webhookData.issue.milestone.due_on}}",
+                              "projectId": "<HAETTAVA: GET /rest/api/3/project/US → id>"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.util.send.web.request",
-          "value": {
-            "method": "POST",
-            "url": "https://uutisseuranta.atlassian.net/rest/api/3/version",
-            "headers": {
-              "Content-Type": "application/json"
-            },
-            "body": {
-              "name": "{{webhookData.issue.milestone.title}}",
-              "releaseDate": "{{webhookData.issue.milestone.due_on}}",
-              "projectId": "<HAETTAVA: GET /rest/api/3/project/US → id>"
-            }
-          }
+          ]
         }
       ]
     },
@@ -461,63 +604,96 @@
       "components": [
         {
           "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{webhookData.action}}",
-                "operator": "EQUALS",
-                "second": "created"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.lookup.issues",
-          "value": {
-            "query": {
-              "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
-            },
-            "variableName": "lookupIssues"
-          }
-        },
-        {
-          "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{lookupIssues.size}}",
-                "operator": "GREATER_THAN",
-                "second": "0"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{webhookData.comment.body}}",
-                "operator": "NOT_STARTS_WITH",
-                "second": "Jira:"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.issue.comment",
-          "value": {
-            "issueKey": "{{lookupIssues.first.key}}",
-            "comment": "Git: @{{webhookData.comment.user.login}}: {{webhookData.comment.body}}"
-          }
+          "type": "jira.condition.container.block",
+          "value": null,
+          "children": [
+            {
+              "component": "CONDITION_BLOCK",
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "component": "CONDITION",
+                  "type": "jira.comparator.condition",
+                  "value": {
+                    "first": "{{webhookData.action}}",
+                    "operator": "EQUALS",
+                    "second": "created"
+                  }
+                },
+                {
+                  "component": "ACTION",
+                  "type": "jira.lookup.issues",
+                  "value": {
+                    "query": {
+                      "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\""
+                    },
+                    "variableName": "lookupIssues"
+                  }
+                },
+                {
+                  "component": "CONDITION",
+                  "type": "jira.condition.container.block",
+                  "value": null,
+                  "children": [
+                    {
+                      "component": "CONDITION_BLOCK",
+                      "type": "jira.condition.if.block",
+                      "value": {
+                        "conditionMatchType": "ALL"
+                      },
+                      "children": [
+                        {
+                          "component": "CONDITION",
+                          "type": "jira.comparator.condition",
+                          "value": {
+                            "first": "{{lookupIssues.size}}",
+                            "operator": "GREATER_THAN",
+                            "second": "0"
+                          }
+                        },
+                        {
+                          "component": "CONDITION",
+                          "type": "jira.condition.container.block",
+                          "value": null,
+                          "children": [
+                            {
+                              "component": "CONDITION_BLOCK",
+                              "type": "jira.condition.if.block",
+                              "value": {
+                                "conditionMatchType": "ALL"
+                              },
+                              "children": [
+                                {
+                                  "component": "CONDITION",
+                                  "type": "jira.comparator.condition",
+                                  "value": {
+                                    "first": "{{webhookData.comment.body}}",
+                                    "operator": "REGEX_NOT_MATCHES",
+                                    "second": "^Jira:"
+                                  }
+                                },
+                                {
+                                  "component": "ACTION",
+                                  "type": "jira.issue.comment",
+                                  "value": {
+                                    "issueKey": "{{lookupIssues.first.key}}",
+                                    "comment": "Git: @{{webhookData.comment.user.login}}: {{webhookData.comment.body}}"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -535,48 +711,69 @@
       "components": [
         {
           "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{issue.customfield_10072}}",
-                "operator": "IS_NOT_EMPTY"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "CONDITION",
-          "type": "jira.condition.if",
-          "_comment": "Sulkee GitHub-issuen kun Jira-status on Done; avaa uudelleen muilla transitioilla.",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{issue.status.name}}",
-                "operator": "IN",
-                "second": "Done,In Progress,To Do,In Review"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.util.send.web.request",
-          "_comment": "PATCH GitHub issue state: Done → closed (completed), muut → open. Silmukkaesto: tämä ei triggeröi Sääntöä 1 koska GitHub-issue-eventit ovat eri webhook-kanava kuin Jira-automation.",
-          "value": {
-            "method": "PATCH",
-            "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
-            "headers": {
-              "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
-              "Content-Type": "application/json"
-            },
-            "body": {
-              "state": "{{#if issue.status.name == 'Done'}}closed{{else}}open{{/if}}",
-              "state_reason": "{{#if issue.status.name == 'Done'}}completed{{/if}}"
+          "type": "jira.condition.container.block",
+          "value": null,
+          "children": [
+            {
+              "component": "CONDITION_BLOCK",
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "component": "CONDITION",
+                  "type": "jira.comparator.condition",
+                  "value": {
+                    "first": "{{issue.customfield_10072}}",
+                    "operator": "IS_NOT_EMPTY"
+                  }
+                },
+                {
+                  "component": "CONDITION",
+                  "type": "jira.condition.container.block",
+                  "value": null,
+                  "children": [
+                    {
+                      "component": "CONDITION_BLOCK",
+                      "type": "jira.condition.if.block",
+                      "value": {
+                        "conditionMatchType": "ALL"
+                      },
+                      "children": [
+                        {
+                          "component": "CONDITION",
+                          "type": "jira.comparator.condition",
+                          "value": {
+                            "first": "{{issue.status.name}}",
+                            "operator": "REGEX_MATCHES",
+                            "second": "^(Done|In Progress|To Do|In Review)$"
+                          }
+                        },
+                        {
+                          "component": "ACTION",
+                          "type": "jira.webrequest",
+                          "_comment": "PATCH GitHub issue state: Done → closed (completed), muut → open. Silmukkaesto: tämä ei triggeröi Sääntöä 1 koska GitHub-issue-eventit ovat eri webhook-kanava kuin Jira-automation.",
+                          "value": {
+                            "method": "PATCH",
+                            "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
+                            "headers": {
+                              "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "state": "{{#if issue.status.name == 'Done'}}closed{{else}}open{{/if}}",
+                              "state_reason": "{{#if issue.status.name == 'Done'}}completed{{/if}}"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
-          }
+          ]
         }
       ]
     },
@@ -598,33 +795,44 @@
       "components": [
         {
           "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{issue.customfield_10072}}",
-                "operator": "IS_NOT_EMPTY"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.util.send.web.request",
-          "value": {
-            "method": "POST",
-            "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}/labels",
-            "headers": {
-              "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
-              "Content-Type": "application/json"
-            },
-            "body": {
-              "labels": [
-                "sprint:{{issue.sprint.name}}"
+          "type": "jira.condition.container.block",
+          "value": null,
+          "children": [
+            {
+              "component": "CONDITION_BLOCK",
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "component": "CONDITION",
+                  "type": "jira.comparator.condition",
+                  "value": {
+                    "first": "{{issue.customfield_10072}}",
+                    "operator": "IS_NOT_EMPTY"
+                  }
+                },
+                {
+                  "component": "ACTION",
+                  "type": "jira.webrequest",
+                  "value": {
+                    "method": "POST",
+                    "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}/labels",
+                    "headers": {
+                      "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
+                      "Content-Type": "application/json"
+                    },
+                    "body": {
+                      "labels": [
+                        "sprint:{{issue.sprint.name}}"
+                      ]
+                    }
+                  }
+                }
               ]
             }
-          }
+          ]
         }
       ]
     },
@@ -646,45 +854,67 @@
       "components": [
         {
           "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{issue.customfield_10072}}",
-                "operator": "IS_NOT_EMPTY"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{issue.summary}}",
-                "operator": "NOT_STARTS_WITH",
-                "second": "Git:"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.util.send.web.request",
-          "value": {
-            "method": "PATCH",
-            "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
-            "headers": {
-              "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
-              "Content-Type": "application/json"
-            },
-            "body": {
-              "title": "Jira: {{issue.summary}}"
+          "type": "jira.condition.container.block",
+          "value": null,
+          "children": [
+            {
+              "component": "CONDITION_BLOCK",
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "component": "CONDITION",
+                  "type": "jira.comparator.condition",
+                  "value": {
+                    "first": "{{issue.customfield_10072}}",
+                    "operator": "IS_NOT_EMPTY"
+                  }
+                },
+                {
+                  "component": "CONDITION",
+                  "type": "jira.condition.container.block",
+                  "value": null,
+                  "children": [
+                    {
+                      "component": "CONDITION_BLOCK",
+                      "type": "jira.condition.if.block",
+                      "value": {
+                        "conditionMatchType": "ALL"
+                      },
+                      "children": [
+                        {
+                          "component": "CONDITION",
+                          "type": "jira.comparator.condition",
+                          "value": {
+                            "first": "{{issue.summary}}",
+                            "operator": "REGEX_NOT_MATCHES",
+                            "second": "^Git:"
+                          }
+                        },
+                        {
+                          "component": "ACTION",
+                          "type": "jira.webrequest",
+                          "value": {
+                            "method": "PATCH",
+                            "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
+                            "headers": {
+                              "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "title": "Jira: {{issue.summary}}"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
-          }
+          ]
         }
       ]
     },
@@ -702,45 +932,67 @@
       "components": [
         {
           "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{issue.customfield_10072}}",
-                "operator": "IS_NOT_EMPTY"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{comment.body}}",
-                "operator": "NOT_STARTS_WITH",
-                "second": "Git:"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.util.send.web.request",
-          "value": {
-            "method": "POST",
-            "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}/comments",
-            "headers": {
-              "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
-              "Content-Type": "application/json"
-            },
-            "body": {
-              "body": "Jira: {{comment.author.displayName}}: {{comment.body}}"
+          "type": "jira.condition.container.block",
+          "value": null,
+          "children": [
+            {
+              "component": "CONDITION_BLOCK",
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "component": "CONDITION",
+                  "type": "jira.comparator.condition",
+                  "value": {
+                    "first": "{{issue.customfield_10072}}",
+                    "operator": "IS_NOT_EMPTY"
+                  }
+                },
+                {
+                  "component": "CONDITION",
+                  "type": "jira.condition.container.block",
+                  "value": null,
+                  "children": [
+                    {
+                      "component": "CONDITION_BLOCK",
+                      "type": "jira.condition.if.block",
+                      "value": {
+                        "conditionMatchType": "ALL"
+                      },
+                      "children": [
+                        {
+                          "component": "CONDITION",
+                          "type": "jira.comparator.condition",
+                          "value": {
+                            "first": "{{comment.body}}",
+                            "operator": "REGEX_NOT_MATCHES",
+                            "second": "^Git:"
+                          }
+                        },
+                        {
+                          "component": "ACTION",
+                          "type": "jira.webrequest",
+                          "value": {
+                            "method": "POST",
+                            "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}/comments",
+                            "headers": {
+                              "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "body": "Jira: {{comment.author.displayName}}: {{comment.body}}"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
-          }
+          ]
         }
       ]
     },
@@ -762,43 +1014,54 @@
       "components": [
         {
           "component": "CONDITION",
-          "type": "jira.condition.if",
-          "value": {
-            "conditions": [
-              {
-                "first": "{{issue.customfield_10072}}",
-                "operator": "IS_NOT_EMPTY"
-              }
-            ],
-            "operator": "AND"
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.util.send.web.request",
-          "value": {
-            "method": "GET",
-            "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/milestones",
-            "headers": {
-              "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
-              "Content-Type": "application/json"
+          "type": "jira.condition.container.block",
+          "value": null,
+          "children": [
+            {
+              "component": "CONDITION_BLOCK",
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "component": "CONDITION",
+                  "type": "jira.comparator.condition",
+                  "value": {
+                    "first": "{{issue.customfield_10072}}",
+                    "operator": "IS_NOT_EMPTY"
+                  }
+                },
+                {
+                  "component": "ACTION",
+                  "type": "jira.webrequest",
+                  "value": {
+                    "method": "GET",
+                    "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/milestones",
+                    "headers": {
+                      "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
+                      "Content-Type": "application/json"
+                    }
+                  }
+                },
+                {
+                  "component": "ACTION",
+                  "type": "jira.webrequest",
+                  "value": {
+                    "method": "PATCH",
+                    "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
+                    "headers": {
+                      "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
+                      "Content-Type": "application/json"
+                    },
+                    "body": {
+                      "milestone": "{{webhookResponse.body.find(x => x.title == issue.fixVersions.first.name).number}}"
+                    }
+                  }
+                }
+              ]
             }
-          }
-        },
-        {
-          "component": "ACTION",
-          "type": "jira.util.send.web.request",
-          "value": {
-            "method": "PATCH",
-            "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
-            "headers": {
-              "Authorization": "Bearer {{secrets.GITHUB_TOKEN}}",
-              "Content-Type": "application/json"
-            },
-            "body": {
-              "milestone": "{{webhookResponse.body.find(x => x.title == issue.fixVersions.first.name).number}}"
-            }
-          }
+          ]
         }
       ]
     }

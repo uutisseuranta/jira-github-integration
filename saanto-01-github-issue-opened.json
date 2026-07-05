@@ -23,32 +23,43 @@
     },
     {
       "component": "CONDITION",
-      "type": "jira.condition.if",
-      "value": {
-        "conditions": [
-          {
-            "first": "{{lookupIssues.size}}",
-            "operator": "EQUALS",
-            "second": "0"
-          }
-        ],
-        "operator": "AND"
-      }
-    },
-    {
-      "component": "ACTION",
-      "type": "jira.issue.create",
-      "value": {
-        "project": "US",
-        "issuetype": "Story",
-        "fields": {
-          "summary": "Git: {{webhookData.issue.title}}",
-          "description": "{{webhookData.issue.body}}",
-          "customfield_10071": "{{webhookData.repository.name}}",
-          "customfield_10072": "{{webhookData.issue.number}}",
-          "customfield_10073": "{{webhookData.issue.html_url}}"
+      "type": "jira.condition.container.block",
+      "value": null,
+      "children": [
+        {
+          "component": "CONDITION_BLOCK",
+          "type": "jira.condition.if.block",
+          "value": {
+            "conditionMatchType": "ALL"
+          },
+          "children": [
+            {
+              "component": "CONDITION",
+              "type": "jira.comparator.condition",
+              "value": {
+                "first": "{{lookupIssues.size}}",
+                "operator": "EQUALS",
+                "second": "0"
+              }
+            },
+            {
+              "component": "ACTION",
+              "type": "jira.issue.create",
+              "value": {
+                "project": "US",
+                "issuetype": "Story",
+                "fields": {
+                  "summary": "Git: {{webhookData.issue.title}}",
+                  "description": "{{webhookData.issue.body}}",
+                  "customfield_10071": "{{webhookData.repository.name}}",
+                  "customfield_10072": "{{webhookData.issue.number}}",
+                  "customfield_10073": "{{webhookData.issue.html_url}}"
+                }
+              }
+            }
+          ]
         }
-      }
+      ]
     }
   ]
 }
