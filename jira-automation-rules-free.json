@@ -2,28 +2,19 @@
   "cloud": true,
   "rules": [
     {
-      "id": 5030368,
-      "clientKey": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
       "name": "Sääntö 1: GitHub issue opened → Luo Jira work item",
       "state": "ENABLED",
-      "description": "Muokattu uutisseuranta-integraatiota varten",
-      "authorAccountId": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8",
-      "actor": {
-        "type": "ACCOUNT_ID",
-        "value": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8"
-      },
-      "created": 1783091654714,
-      "updated": 1783094867096,
+      "description": "Luo uuden Jira-tehtävän kun GitHubiin avataan issue",
       "trigger": {
-        "id": "a7206686-78b0-475f-9271-c4719987bbd0",
+        "id": "75c3132b-db7a-4d36-98a8-d873064483fa",
         "parentId": null,
         "conditionParentId": null,
         "component": "TRIGGER",
         "type": "jira.incoming.webhook",
         "value": {
+          "webhookToken": "4a11558dbeb1d0019fc92c586d5719b23259f1ae",
           "searchOrProvide": "none",
-          "jql": null,
-          "webhookToken": "081e586360f825ae9b6a3622edce760b76d6e36c"
+          "jql": null
         },
         "conditions": [],
         "children": [],
@@ -33,7 +24,7 @@
       },
       "components": [
         {
-          "id": "807237bb-0eb0-4d43-8775-b32e69ad3268",
+          "id": "6d603f4b-82df-4aae-82b8-cfc43d40a316",
           "parentId": null,
           "conditionParentId": null,
           "component": "ACTION",
@@ -99,18 +90,17 @@
       "labels": [],
       "tags": [
         {
-          "id": 10991418,
-          "ruleIdUuid": "019f288b-703a-7e52-bd20-d9cb4f5cb560",
-          "tagType": "IS_RULE_UPDATED",
-          "tagValue": "true"
-        },
-        {
-          "id": 2000000,
-          "ruleIdUuid": "019f288b-703a-7e52-bd20-d9cb4f5cb560",
+          "id": 2000001,
           "tagType": "WEBHOOK_TOKEN",
-          "tagValue": "081e586360f825ae9b6a3622edce760b76d6e36c"
+          "tagValue": "4a11558dbeb1d0019fc92c586d5719b23259f1ae"
         }
       ],
+      "clientKey": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "authorAccountId": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8",
+      "actor": {
+        "type": "ACCOUNT_ID",
+        "value": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8"
+      },
       "ruleScope": {
         "resources": [
           "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
@@ -127,10 +117,516 @@
       "writeAccessType": "OWNER_ONLY",
       "collaborators": [],
       "billingType": "NORMAL",
-      "idUuid": "019f288b-703a-7e52-bd20-d9cb4f5cb560",
       "partitionId": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
-      "checksum": null,
-      "currentVersionId": null
+      "id": 6000001,
+      "idUuid": "16514f4f-f692-431b-beb6-b217e4b894df"
+    },
+    {
+      "name": "Sääntö 2: GitHub issue edited → Päivitä Jira work item",
+      "state": "ENABLED",
+      "description": "Päivittää Jira-tehtävän otsikon ja kuvauksen kun GitHub-issuea muokataan",
+      "trigger": {
+        "id": "3df58e20-29cc-4b92-a560-558b22cc7772",
+        "parentId": null,
+        "conditionParentId": null,
+        "component": "TRIGGER",
+        "type": "jira.incoming.webhook",
+        "value": {
+          "webhookToken": "8d7f06c1c7a7d9f5ef3f7fbc156ff95bbd404c4b",
+          "searchOrProvide": "none",
+          "jql": null
+        },
+        "conditions": [],
+        "children": [],
+        "schemaVersion": 1,
+        "connectionId": null,
+        "checksum": null
+      },
+      "components": [
+        {
+          "id": "f3b94060-1c97-44f6-acf5-ca2886b6fa13",
+          "parentId": null,
+          "conditionParentId": null,
+          "component": "BRANCH",
+          "type": "jira.issue.related",
+          "value": {
+            "relatedType": "jql",
+            "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\"",
+            "onlyUpdatedIssues": false
+          },
+          "conditions": [],
+          "children": [
+            {
+              "id": "f5e2dd77-1a7f-4742-9a1b-b725b20aa8d4",
+              "parentId": null,
+              "conditionParentId": null,
+              "component": "ACTION",
+              "type": "jira.issue.edit",
+              "value": {
+                "operations": [
+                  {
+                    "field": {
+                      "type": "ID",
+                      "value": "summary"
+                    },
+                    "fieldType": "summary",
+                    "type": "SET",
+                    "value": "Git: {{webhookData.issue.title}}"
+                  },
+                  {
+                    "field": {
+                      "type": "ID",
+                      "value": "description"
+                    },
+                    "fieldType": "description",
+                    "type": "SET",
+                    "value": "{{webhookData.issue.body}}"
+                  }
+                ],
+                "sendNotifications": false
+              },
+              "conditions": [],
+              "children": [],
+              "schemaVersion": 12,
+              "connectionId": null,
+              "checksum": null
+            }
+          ],
+          "schemaVersion": 1,
+          "connectionId": null,
+          "checksum": null
+        }
+      ],
+      "canOtherRuleTrigger": false,
+      "notifyOnError": "FIRSTERROR",
+      "projects": [],
+      "labels": [],
+      "tags": [
+        {
+          "id": 2000002,
+          "tagType": "WEBHOOK_TOKEN",
+          "tagValue": "8d7f06c1c7a7d9f5ef3f7fbc156ff95bbd404c4b"
+        }
+      ],
+      "clientKey": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "authorAccountId": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8",
+      "actor": {
+        "type": "ACCOUNT_ID",
+        "value": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8"
+      },
+      "ruleScope": {
+        "resources": [
+          "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        ]
+      },
+      "ruleHome": {
+        "ruleLifecycleHome": {
+          "locationARI": "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        },
+        "ruleBillingHome": {
+          "locationARI": "ari:cloud:jira-software::site/38191fa4-e340-4d5e-8f7d-33c8f6829dbd"
+        }
+      },
+      "writeAccessType": "OWNER_ONLY",
+      "collaborators": [],
+      "billingType": "NORMAL",
+      "partitionId": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "id": 6000002,
+      "idUuid": "2e28dc84-0299-4ab9-ac8c-dd986d035b31"
+    },
+    {
+      "name": "Sääntö 3: GitHub issue closed → Transition work item → Done",
+      "state": "ENABLED",
+      "description": "Muuttaa Jira-tehtävän tilaksi Done kun GitHub-issue suljetaan",
+      "trigger": {
+        "id": "73e2760b-c2d8-458a-beb8-80eaf239c300",
+        "parentId": null,
+        "conditionParentId": null,
+        "component": "TRIGGER",
+        "type": "jira.incoming.webhook",
+        "value": {
+          "webhookToken": "28028e7734b1cb3cd04885291aac64bc1649ccbf",
+          "searchOrProvide": "none",
+          "jql": null
+        },
+        "conditions": [],
+        "children": [],
+        "schemaVersion": 1,
+        "connectionId": null,
+        "checksum": null
+      },
+      "components": [
+        {
+          "id": "260fef91-0855-46f2-80c4-3f41e0761766",
+          "parentId": null,
+          "conditionParentId": null,
+          "component": "BRANCH",
+          "type": "jira.issue.related",
+          "value": {
+            "relatedType": "jql",
+            "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\"",
+            "onlyUpdatedIssues": false
+          },
+          "conditions": [],
+          "children": [
+            {
+              "id": "90792933-0508-4356-bb97-549a382b1fc5",
+              "parentId": null,
+              "conditionParentId": null,
+              "component": "ACTION",
+              "type": "jira.issue.transition",
+              "value": {
+                "operations": [],
+                "sendNotifications": false,
+                "destinationStatus": {
+                  "type": "NAME",
+                  "value": "Done"
+                }
+              },
+              "conditions": [],
+              "children": [],
+              "schemaVersion": 1,
+              "connectionId": null,
+              "checksum": null
+            }
+          ],
+          "schemaVersion": 1,
+          "connectionId": null,
+          "checksum": null
+        }
+      ],
+      "canOtherRuleTrigger": false,
+      "notifyOnError": "FIRSTERROR",
+      "projects": [],
+      "labels": [],
+      "tags": [
+        {
+          "id": 2000003,
+          "tagType": "WEBHOOK_TOKEN",
+          "tagValue": "28028e7734b1cb3cd04885291aac64bc1649ccbf"
+        }
+      ],
+      "clientKey": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "authorAccountId": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8",
+      "actor": {
+        "type": "ACCOUNT_ID",
+        "value": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8"
+      },
+      "ruleScope": {
+        "resources": [
+          "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        ]
+      },
+      "ruleHome": {
+        "ruleLifecycleHome": {
+          "locationARI": "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        },
+        "ruleBillingHome": {
+          "locationARI": "ari:cloud:jira-software::site/38191fa4-e340-4d5e-8f7d-33c8f6829dbd"
+        }
+      },
+      "writeAccessType": "OWNER_ONLY",
+      "collaborators": [],
+      "billingType": "NORMAL",
+      "partitionId": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "id": 6000003,
+      "idUuid": "980b0f3f-18bd-4f83-a0ce-9e99e26e8e80"
+    },
+    {
+      "name": "Sääntö 4: GitHub issue reopened → Transition work item → To Do",
+      "state": "ENABLED",
+      "description": "Palauttaa Jira-tehtävän tilaksi To Do kun GitHub-issue avataan uudelleen",
+      "trigger": {
+        "id": "8170cfc9-f88c-447c-a2f1-52fbf6b72464",
+        "parentId": null,
+        "conditionParentId": null,
+        "component": "TRIGGER",
+        "type": "jira.incoming.webhook",
+        "value": {
+          "webhookToken": "58a574a0cd5ee09ca7207c2d492f77fa84654193",
+          "searchOrProvide": "none",
+          "jql": null
+        },
+        "conditions": [],
+        "children": [],
+        "schemaVersion": 1,
+        "connectionId": null,
+        "checksum": null
+      },
+      "components": [
+        {
+          "id": "8b4eb6bd-7980-4113-9744-c7ad0714f22a",
+          "parentId": null,
+          "conditionParentId": null,
+          "component": "BRANCH",
+          "type": "jira.issue.related",
+          "value": {
+            "relatedType": "jql",
+            "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\"",
+            "onlyUpdatedIssues": false
+          },
+          "conditions": [],
+          "children": [
+            {
+              "id": "c1570af1-c8fa-4378-a868-eb498286241d",
+              "parentId": null,
+              "conditionParentId": null,
+              "component": "ACTION",
+              "type": "jira.issue.transition",
+              "value": {
+                "operations": [],
+                "sendNotifications": false,
+                "destinationStatus": {
+                  "type": "NAME",
+                  "value": "To Do"
+                }
+              },
+              "conditions": [],
+              "children": [],
+              "schemaVersion": 1,
+              "connectionId": null,
+              "checksum": null
+            }
+          ],
+          "schemaVersion": 1,
+          "connectionId": null,
+          "checksum": null
+        }
+      ],
+      "canOtherRuleTrigger": false,
+      "notifyOnError": "FIRSTERROR",
+      "projects": [],
+      "labels": [],
+      "tags": [
+        {
+          "id": 2000004,
+          "tagType": "WEBHOOK_TOKEN",
+          "tagValue": "58a574a0cd5ee09ca7207c2d492f77fa84654193"
+        }
+      ],
+      "clientKey": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "authorAccountId": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8",
+      "actor": {
+        "type": "ACCOUNT_ID",
+        "value": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8"
+      },
+      "ruleScope": {
+        "resources": [
+          "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        ]
+      },
+      "ruleHome": {
+        "ruleLifecycleHome": {
+          "locationARI": "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        },
+        "ruleBillingHome": {
+          "locationARI": "ari:cloud:jira-software::site/38191fa4-e340-4d5e-8f7d-33c8f6829dbd"
+        }
+      },
+      "writeAccessType": "OWNER_ONLY",
+      "collaborators": [],
+      "billingType": "NORMAL",
+      "partitionId": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "id": 6000004,
+      "idUuid": "92084fd6-c1b5-429a-adff-6b67ba0e5895"
+    },
+    {
+      "name": "Sääntö 5: GitHub issue labeled/unlabeled → Edit work item labels",
+      "state": "ENABLED",
+      "description": "Synkronoi labelit GitHub-issuen ja Jira-tehtävän välillä",
+      "trigger": {
+        "id": "40409bd6-4f89-4c21-93f1-12bf268d14b5",
+        "parentId": null,
+        "conditionParentId": null,
+        "component": "TRIGGER",
+        "type": "jira.incoming.webhook",
+        "value": {
+          "webhookToken": "2d317b565882dc2023baa24c9409cf0fa6f7dbe0",
+          "searchOrProvide": "none",
+          "jql": null
+        },
+        "conditions": [],
+        "children": [],
+        "schemaVersion": 1,
+        "connectionId": null,
+        "checksum": null
+      },
+      "components": [
+        {
+          "id": "e46a04c7-d4b8-4d34-b082-37efc37470de",
+          "parentId": null,
+          "conditionParentId": null,
+          "component": "BRANCH",
+          "type": "jira.issue.related",
+          "value": {
+            "relatedType": "jql",
+            "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\"",
+            "onlyUpdatedIssues": false
+          },
+          "conditions": [],
+          "children": [
+            {
+              "id": "071cf5a1-49cb-4f8e-996c-5e31fa24418e",
+              "parentId": null,
+              "conditionParentId": null,
+              "component": "ACTION",
+              "type": "jira.issue.edit",
+              "value": {
+                "operations": [
+                  {
+                    "field": {
+                      "type": "ID",
+                      "value": "labels"
+                    },
+                    "fieldType": "labels",
+                    "type": "{{#if(webhookData.action.equals(\"labeled\"))}}ADD{{else}}REMOVE{{/if}}",
+                    "value": "{{webhookData.label.name}}"
+                  }
+                ],
+                "sendNotifications": false
+              },
+              "conditions": [],
+              "children": [],
+              "schemaVersion": 12,
+              "connectionId": null,
+              "checksum": null
+            }
+          ],
+          "schemaVersion": 1,
+          "connectionId": null,
+          "checksum": null
+        }
+      ],
+      "canOtherRuleTrigger": false,
+      "notifyOnError": "FIRSTERROR",
+      "projects": [],
+      "labels": [],
+      "tags": [
+        {
+          "id": 2000005,
+          "tagType": "WEBHOOK_TOKEN",
+          "tagValue": "2d317b565882dc2023baa24c9409cf0fa6f7dbe0"
+        }
+      ],
+      "clientKey": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "authorAccountId": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8",
+      "actor": {
+        "type": "ACCOUNT_ID",
+        "value": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8"
+      },
+      "ruleScope": {
+        "resources": [
+          "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        ]
+      },
+      "ruleHome": {
+        "ruleLifecycleHome": {
+          "locationARI": "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        },
+        "ruleBillingHome": {
+          "locationARI": "ari:cloud:jira-software::site/38191fa4-e340-4d5e-8f7d-33c8f6829dbd"
+        }
+      },
+      "writeAccessType": "OWNER_ONLY",
+      "collaborators": [],
+      "billingType": "NORMAL",
+      "partitionId": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "id": 6000005,
+      "idUuid": "09966730-83c4-447e-910b-2651635fd39c"
+    },
+    {
+      "name": "Sääntö 8: GitHub issue comment created → Comment on work item",
+      "state": "ENABLED",
+      "description": "Lisää kommentin Jira-tehtävään kun GitHub-issueen lisätään kommentti",
+      "trigger": {
+        "id": "b06897d6-44a3-4996-a56e-a85b3a77007e",
+        "parentId": null,
+        "conditionParentId": null,
+        "component": "TRIGGER",
+        "type": "jira.incoming.webhook",
+        "value": {
+          "webhookToken": "494ab8cbad42161696f4f0eb9fec5be6647333e2",
+          "searchOrProvide": "none",
+          "jql": null
+        },
+        "conditions": [],
+        "children": [],
+        "schemaVersion": 1,
+        "connectionId": null,
+        "checksum": null
+      },
+      "components": [
+        {
+          "id": "c267fcdd-d978-4a77-ada9-6c45d1b996bd",
+          "parentId": null,
+          "conditionParentId": null,
+          "component": "BRANCH",
+          "type": "jira.issue.related",
+          "value": {
+            "relatedType": "jql",
+            "jql": "project = US AND cf[10072] = {{webhookData.issue.number}} AND cf[10071] = \"{{webhookData.repository.name}}\"",
+            "onlyUpdatedIssues": false
+          },
+          "conditions": [],
+          "children": [
+            {
+              "id": "8dfb3ee8-7577-4fbf-9a3b-43743a8b99e5",
+              "parentId": null,
+              "conditionParentId": null,
+              "component": "ACTION",
+              "type": "jira.issue.comment",
+              "value": {
+                "comment": "{{webhookData.comment.body}}",
+                "sendNotifications": false
+              },
+              "conditions": [],
+              "children": [],
+              "schemaVersion": 1,
+              "connectionId": null,
+              "checksum": null
+            }
+          ],
+          "schemaVersion": 1,
+          "connectionId": null,
+          "checksum": null
+        }
+      ],
+      "canOtherRuleTrigger": false,
+      "notifyOnError": "FIRSTERROR",
+      "projects": [],
+      "labels": [],
+      "tags": [
+        {
+          "id": 2000008,
+          "tagType": "WEBHOOK_TOKEN",
+          "tagValue": "494ab8cbad42161696f4f0eb9fec5be6647333e2"
+        }
+      ],
+      "clientKey": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "authorAccountId": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8",
+      "actor": {
+        "type": "ACCOUNT_ID",
+        "value": "557058:18afcd39-a47a-4663-8b03-fcb7ce1003b8"
+      },
+      "ruleScope": {
+        "resources": [
+          "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        ]
+      },
+      "ruleHome": {
+        "ruleLifecycleHome": {
+          "locationARI": "ari:cloud:jira:38191fa4-e340-4d5e-8f7d-33c8f6829dbd:project/10000"
+        },
+        "ruleBillingHome": {
+          "locationARI": "ari:cloud:jira-software::site/38191fa4-e340-4d5e-8f7d-33c8f6829dbd"
+        }
+      },
+      "writeAccessType": "OWNER_ONLY",
+      "collaborators": [],
+      "billingType": "NORMAL",
+      "partitionId": "767fdf21-94ad-467a-bf3d-5890deb1f2ea",
+      "id": 6000008,
+      "idUuid": "305bfe6e-a93f-4c35-96d0-04f2a84c1181"
     }
   ]
 }
