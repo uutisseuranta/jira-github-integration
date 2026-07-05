@@ -6,7 +6,7 @@ Automatisoitu kaksisuuntainen synkronointi GitHub Issuesin ja Jira-projektin vä
 
 ## ⚠️ Vaaditut Secrets
 
-Ennen kuin mikaan toimii, lisää nämä **GitHub repository secretseihin** (`Settings → Secrets and variables → Actions`):
+Ennen kuin mikään toimii, lisää nämä **GitHub repository secretseihin** (`Settings → Secrets and variables → Actions`):
 
 | Secret | Kuvaus | Esimerkki |
 |--------|--------|--------|
@@ -37,22 +37,26 @@ GitHub-label määrittää Jira work item -tyypin:
 
 ---
 
-## Automation-sääntöjen hallinta
+## Automation flows -hallinta
 
-### Importoi sääntö
+### Tuo flow (import)
 
-Avaa suoraan: **[https://uutisseuranta.atlassian.net/jira/settings/automation#/import](https://uutisseuranta.atlassian.net/jira/settings/automation#/import)**
+Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtaisesta näkymästä.
 
-1. Lataa JSON-tiedosto reposta (ks. Tiedostot-taulukko alla)
-2. Klikkaa **Import** / **Import flow**
-3. Valitse projektiksi `US` (Uutisseuranta)
-4. Tallenna ja aktivoi
+1. Avaa **Jira settings → System → Automation flows**
+   (suora linkki: [https://uutisseuranta.atlassian.net/jira/settings/automation](https://uutisseuranta.atlassian.net/jira/settings/automation))
+2. Paina oikeasta yläkulmasta **… (More actions) → Import flows**
+3. Valitse JSON-tiedosto reposta (ks. Tiedostot-taulukko alla)
+4. Valitse projektikohdistukseksi `US` (Uutisseuranta) ja haluamasi flowt
+5. Paina **Let’s do this**
+6. **Aktivoi tuodut flowt manuaalisesti** — kaikki tuodut flowt tulevat disabled-tilassa
+
+> **HUOM:** Jos samanniminen flow on jo olemassa, tuodun nimi muuttuu automaattisesti muotoon `Copy of [nimi]`. Tarkista duplikaatit ja poista vanhentunut versio.
 
 ### Audit log (vianetsintä)
 
-Avaa suoraan: **[https://uutisseuranta.atlassian.net/jira/settings/automation#/audit-log](https://uutisseuranta.atlassian.net/jira/settings/automation#/audit-log)**
-
-> **HUOM:** Polku `Jira Settings → System → Automation` ei toimi tässä instanssissa. Käytä aina suoria URL-linkkejä yllä.
+1. Avaa **Jira settings → System → Automation flows**
+2. Paina **Audit log** vasemman sivupalkin alaosasta
 
 ---
 
@@ -76,7 +80,7 @@ Avaa suoraan: **[https://uutisseuranta.atlassian.net/jira/settings/automation#/a
 ## Rakenne
 
 ```
-├── saanto-01...09-*.json         # Jira Automation -säännöt (JSON-export)
+├── saanto-01...09-*.json         # Jira Automation flows (JSON-export)
 ├── webhook-payload-example.json  # GitHub webhook payload -esimerkki
 ├── migrate-history.py            # Migraatioskripti: GitHub Issues → Jira
 ├── .github/workflows/
@@ -91,9 +95,10 @@ Avaa suoraan: **[https://uutisseuranta.atlassian.net/jira/settings/automation#/a
 ## Nopea aloitus
 
 1. Lisää secretit (katso taulukko yllä)
-2. Tuo JSON-säännöt Jira Automationiin: [https://uutisseuranta.atlassian.net/jira/settings/automation#/import](https://uutisseuranta.atlassian.net/jira/settings/automation#/import)
-3. Luo GitHub webhook (`Settings → Webhooks`) osoitteeseen jonka Jira tarjoaa
-4. Testaa: luo GitHub issue → tarkista että Jira-issue syntyy
+2. Tuo JSON-flowt: **Jira settings → System → Automation flows → … → Import flows**
+3. Aktivoi tuodut flowt manuaalisesti (tulevat disabled-tilassa)
+4. Luo GitHub webhook (`Settings → Webhooks`) osoitteeseen jonka Jira tarjoaa
+5. Testaa: luo GitHub issue → tarkista että Jira-issue syntyy
 
 ## Migraatio (vanhat issuet)
 
@@ -110,9 +115,9 @@ Tämä repositorio toimii uutisseuranta-organisaation keskitettynä integraatioh
 
 Otsikkosynkronointi on täysin kaksisuuntainen ja perustuu etuliitteisiin **`Git:`** ja **`Jira:`** (ilman hakasulkeita). Alkuperäinen luontipaikka määrittää tiketin master-järjestelmän: jos tiketti luodaan GitHubissa, se saa Jiraan etuliitteen `Git:`. Jira Automation tunnistaa tämän ja skippaa synkronoinnin takaisin GitHubiin, estäen ikuiset päivityssilmukat ilman viiveitä tai monimutkaista aritmetiikkaa (L-002).
 
-### 2. Automaattinen validointi (Test Coverage 100 %)
+### 2. Automaattinen validointi (Test Coverage 100 %)
 
-Kaikki JSON-muotoiset säännöt (`saanto-*.json`) validoidaan automaattisesti jokaisessa PR- ja CI-ajossa Python-testiohjelmalla [`test-rules.py`](test-rules.py). Testit tarkistavat JSON-syntaksin, custom-kenttien käytön (`customfield_10071`–10073`), etuliitteiden oikeellisuuden sekä varmistavat, ettei säännöissä ole kielletttyjä label-poistoja (L-006).
+Kaikki JSON-muotoiset flowt (`saanto-*.json`) validoidaan automaattisesti jokaisessa PR- ja CI-ajossa Python-testiohjelmalla [`test-rules.py`](test-rules.py). Testit tarkistavat JSON-syntaksin, custom-kenttien käytön (`customfield_10071`–10073), etuliitteiden oikeellisuuden sekä varmistavat, ettei floweissa ole kiellettyjä label-poistoja (L-006).
 
 ### 3. Keskitetty deployment-automaatio
 
