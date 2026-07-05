@@ -565,7 +565,7 @@
                         },
                         {
                           "component": "ACTION",
-                          "type": "jira.webrequest",
+                          "type": "jira.webrequest.action",
                           "value": {
                             "method": "POST",
                             "url": "https://uutisseuranta.atlassian.net/rest/api/3/version",
@@ -752,7 +752,7 @@
                         },
                         {
                           "component": "ACTION",
-                          "type": "jira.webrequest",
+                          "type": "jira.webrequest.action",
                           "_comment": "PATCH GitHub issue state: Done → closed (completed), muut → open. Silmukkaesto: tämä ei triggeröi Sääntöä 1 koska GitHub-issue-eventit ovat eri webhook-kanava kuin Jira-automation.",
                           "value": {
                             "method": "PATCH",
@@ -815,7 +815,7 @@
                 },
                 {
                   "component": "ACTION",
-                  "type": "jira.webrequest",
+                  "type": "jira.webrequest.action",
                   "value": {
                     "method": "POST",
                     "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}/labels",
@@ -895,7 +895,7 @@
                         },
                         {
                           "component": "ACTION",
-                          "type": "jira.webrequest",
+                          "type": "jira.webrequest.action",
                           "value": {
                             "method": "PATCH",
                             "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
@@ -973,7 +973,7 @@
                         },
                         {
                           "component": "ACTION",
-                          "type": "jira.webrequest",
+                          "type": "jira.webrequest.action",
                           "value": {
                             "method": "POST",
                             "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}/comments",
@@ -1034,7 +1034,7 @@
                 },
                 {
                   "component": "ACTION",
-                  "type": "jira.webrequest",
+                  "type": "jira.webrequest.action",
                   "value": {
                     "method": "GET",
                     "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/milestones",
@@ -1046,7 +1046,7 @@
                 },
                 {
                   "component": "ACTION",
-                  "type": "jira.webrequest",
+                  "type": "jira.webrequest.action",
                   "value": {
                     "method": "PATCH",
                     "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",

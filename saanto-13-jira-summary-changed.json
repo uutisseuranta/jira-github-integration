@@ -57,7 +57,7 @@
                     },
                     {
                       "component": "ACTION",
-                      "type": "jira.webrequest",
+                      "type": "jira.webrequest.action",
                       "value": {
                         "method": "PATCH",
                         "url": "https://api.github.com/repos/uutisseuranta/{{issue.customfield_10071}}/issues/{{issue.customfield_10072}}",
