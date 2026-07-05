@@ -55,32 +55,6 @@ gh secret list --repo uutisseuranta/jira-github-integration
 
 ---
 
-## Mitä Atlassian Rovo MCP Server tekee (ja mitä ei)
-
-**Rovo MCP Server** (`https://mcp.atlassian.com/v1/sse`) on Atlassianin virallinen remote MCP -palvelin, joka yhdistää Claude Coden, Cursorin tai VS Coden Atlassian-ekosysteemiin. Se autentikoidaan OAuth 2.1:llä tai API-tokenilla.
-
-**Rovo MCP voi:**
-- Lukea ja kirjoittaa **Jira-issuet** (getJiraIssue, createJiraIssue, editJiraIssue, transitionJiraIssue, searchJiraIssuesUsingJql)
-- Lukea ja kirjoittaa **Confluence-sivut** (getConfluencePage, createConfluencePage, updateConfluencePage)
-- Hakea tietoa **Bitbucket-repositorioista** (pull requestit, commitit, pipelinit)
-- Hallita **Compass-komponentteja**
-- Hakea yhteyksiä Teamwork Graphista (Jira ↔ Confluence ↔ PR:t ↔ deploymentit)
-
-**Rovo MCP EI voi:**
-- Hallita GitHub repository secretsejä
-- Muuttaa GitHub Actions -konfiguraatioita
-- Kirjoittaa tiedostoja GitHub-repositorioon (se onnistuu vain GitHub MCP Serverillä tai GitHub CLI:llä)
-
-Claude Coden yhdistäminen Atlassian Rovo MCP:hen:
-
-```bash
-claude mcp add --scope user --transport sse atlassian https://mcp.atlassian.com/v1/sse
-```
-
-Tämän jälkeen Claude Code avaa OAuth-kirjautumisikkunan selaimessa ja pyytää hyväksymään Jira/Confluence-oikeudet.
-
----
-
 ## Issuetype-mapaus
 
 GitHub-label määrittää Jira work item -tyypin:
@@ -133,6 +107,10 @@ Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtais
 | [`saanto-09-jira-status-changed.json`](saanto-09-jira-status-changed.json) | Jira status changed → päivitä GitHub issue state |
 | [`test-webhook.sh`](test-webhook.sh) | Manuaalinen curl-testi — aja paikallisesti webhookin testaamiseen |
 | [`webhook-payload-example.json`](webhook-payload-example.json) | Esimerkki webhook-payloadista — käytä testauksen pohjana |
+| [`.github/workflows/deploy-integration.yml`](.github/workflows/deploy-integration.yml) | Synkronoi `jira-webhook-relay.yml` automaattisesti organisaation repoihin (`uutisseuranta.github.io`, `patterns`, `bq-activitystreams`, `skills`, `ops`) |
+| [`.github/workflows/jira-webhook-relay.yml`](.github/workflows/jira-webhook-relay.yml) | GitHub Actions -rele: välittää GitHub-webhook-pyynnöt Jira Automation Incoming Webhook -osoitteeseen |
+| [`.github/workflows/lint-filenames.yml`](.github/workflows/lint-filenames.yml) | CI-tarkistus: varmistaa tiedostonimien yhdenmukaisuuden CODE_CONVENTIONS.md-säännöillä |
+| [`migrate-history.py`](migrate-history.py) | Migraatioskripti: siirtää vanhat GitHub Issues → Jira, lisää `Git:`-etuliitteen tiketteihin |
 
 ---
 
@@ -143,6 +121,9 @@ Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtais
 ├── webhook-payload-example.json  # GitHub webhook payload -esimerkki
 ├── migrate-history.py            # Migraatioskripti: GitHub Issues → Jira
 ├── .github/workflows/
+│   ├── deploy-integration.yml    # Synkronoi jira-webhook-relay.yml organisaation muihin repoihin
+│   ├── jira-webhook-relay.yml    # Rele: GitHub webhook → Jira Automation
+│   ├── lint-filenames.yml        # CI: tiedostonimitarkistus
 │   └── migrate-history.yml       # GitHub Actions workflow migraatiolle
 ├── TECHNICAL_DESIGN.md           # Tekninen suunnittelu ja päätökset
 ├── DECISION_LOG.csv              # Arkkitehtuuripäätökset
@@ -156,13 +137,43 @@ Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtais
 1. Lisää secretit (katso taulukko yllä) — GitHub UI:lla tai `gh secret set` -komennolla
 2. Tuo JSON-flowt: **Jira settings → System → Automation flows → … → Import flows**
 3. Aktivoi tuodut flowt manuaalisesti (tulevat disabled-tilassa)
-4. Luo GitHub webhook (`Settings → Webhooks`) osoitteeseen jonka Jira tarjoaa
+4. Luo GitHub webhook: `Settings → Webhooks → Add webhook`
+   - **Payload URL:** `JIRA_WEBHOOK_URL`-secretin arvo (Jira Automation → saanto-01 → Incoming Webhook -osoite)
+   - **Content type:** `application/json`
+   - **Secret:** `GITHUB_WEBHOOK_SECRET`-secretin arvo
+   - **Events:** _Issues_ ja _Issue comments_
 5. Testaa: luo GitHub issue → tarkista että Jira-issue syntyy
 
 ## Migraatio (vanhat issuet)
 
 Käynnistä `Actions → Migrate GitHub Issues to Jira → Run workflow`.
 Sama workflow toimii seuraavaan projektiin vaihtamalla `project_key`-parametri. Migraatioskripti ([`migrate-history.py`](migrate-history.py)) lisää automaattisesti `Git:`-etuliitteen tiketteihin.
+
+---
+
+## Mitä Atlassian Rovo MCP Server tekee (ja mitä ei)
+
+**Rovo MCP Server** (`https://mcp.atlassian.com/v1/sse`) on Atlassianin virallinen remote MCP -palvelin, joka yhdistää Claude Coden, Cursorin tai VS Coden Atlassian-ekosysteemiin. Se autentikoidaan OAuth 2.1:llä tai API-tokenilla.
+
+**Rovo MCP voi:**
+- Lukea ja kirjoittaa **Jira-issuet** (getJiraIssue, createJiraIssue, editJiraIssue, transitionJiraIssue, searchJiraIssuesUsingJql)
+- Lukea ja kirjoittaa **Confluence-sivut** (getConfluencePage, createConfluencePage, updateConfluencePage)
+- Hakea tietoa **Bitbucket-repositorioista** (pull requestit, commitit, pipelinit)
+- Hallita **Compass-komponentteja**
+- Hakea yhteyksiä Teamwork Graphista (Jira ↔ Confluence ↔ PR:t ↔ deploymentit)
+
+**Rovo MCP EI voi:**
+- Hallita GitHub repository secretsejä
+- Muuttaa GitHub Actions -konfiguraatioita
+- Kirjoittaa tiedostoja GitHub-repositorioon (se onnistuu vain GitHub MCP Serverillä tai GitHub CLI:llä)
+
+Claude Coden yhdistäminen Atlassian Rovo MCP:hen:
+
+```bash
+claude mcp add --scope user --transport sse atlassian https://mcp.atlassian.com/v1/sse
+```
+
+Tämän jälkeen Claude Code avaa OAuth-kirjautumisikkunan selaimessa ja pyytää hyväksymään Jira/Confluence-oikeudet.
 
 ---
 
@@ -176,14 +187,4 @@ Otsikkosynkronointi on täysin kaksisuuntainen ja perustuu etuliitteisiin **`Git
 
 ### 2. Automaattinen validointi (Test Coverage 100 %)
 
-Kaikki JSON-muotoiset flowt (`saanto-*.json`) validoidaan automaattisesti jokaisessa PR- ja CI-ajossa Python-testiohjelmalla [`test-rules.py`](test-rules.py). Testit tarkistavat JSON-syntaksin, custom-kenttien käytön (`customfield_10071`–10073), etuliitteiden oikeellisuuden sekä varmistavat, ettei floweissa ole kiellettyjä label-poistoja (L-006).
-
-### 3. Keskitetty deployment-automaatio
-
-[**`deploy-integration.yml`**](.github/workflows/deploy-integration.yml) synkronoi ja pushaa `jira-webhook-relay.yml` -välitystiedoston automaattisesti organisaation muihin repositorioihin (`uutisseuranta.github.io`, `patterns`, `bq-activitystreams`, `skills`, `ops`). Tietoturva on varmistettu `insteadOf` URL-uudelleenkirjoituksella, jotta tokenit eivät pääse vuotamaan Actions-virhelokeihin.
-
-### 4. Tietoturvapolitiikka ja koodivastuut
-
-`main`-haara on suojattu kaikissa julkisissa repoissa — vaatii vähintään 1 hyväksytyn katselmoinnin ja Code Owner -hyväksynnän. Koodivastuut on määritelty repositorion juuressa `@jaakkokorhonen` vastuulle.
-
-Lisätietoja: [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md) ja [DECISION_LOG.csv](DECISION_LOG.csv)
+Kaikki JSON-muotoiset flowt (`saanto-*.json`) validoidaan automaattisesti jokaisessa PR- ja CI-ajossa Python-testiohjelmalla [`test-rules.py`](test-rules.py). Testit tarkistavat JSON-syntaksin, custom-kenttien käytön (`customfield_10071`–10073), etuliitteiden oikeellisuuden
