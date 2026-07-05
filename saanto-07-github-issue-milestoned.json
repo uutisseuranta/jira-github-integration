@@ -76,7 +76,7 @@
                     },
                     {
                       "component": "ACTION",
-                      "type": "jira.send.webrequest",
+                      "type": "jira.web.request",
                       "value": {
                         "method": "POST",
                         "url": "https://uutisseuranta.atlassian.net/rest/api/3/version",

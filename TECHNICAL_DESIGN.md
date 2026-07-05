@@ -90,7 +90,7 @@ Tässä integraatiossa käytettävät toiminnot ja niiden viralliset JSON-konfig
 | **`jira.issue.edit`** | *Edit work item* (Muokkaa tehtävää) | **Yhteensopiva** — standardi Jira Cloud -toiminto. |
 | **`jira.issue.transition`** | *Transition work item* (Vaihda tehtävän tilaa) | **Yhteensopiva** — standardi Jira Cloud -toiminto. |
 | **`jira.issue.comment`** | *Comment on work item* (Kommentoi tehtävää) | **Yhteensopiva** — standardi Jira Cloud -toiminto. |
-| **`jira.send.webrequest`** | *Send web request* (Lähetä verkkopyyntö / webhook) | **Yhteensopiva** — korvannut vanhentuneet `jira.util.send.web.request` ja `jira.webrequest` tyypit. |
+| **`jira.web.request`** | *Send web request* (Lähetä verkkopyyntö / webhook) | **Yhteensopiva** — korvannut vanhentuneet `jira.util.send.web.request` ja `jira.webrequest` tyypit. |
 
 ---
 

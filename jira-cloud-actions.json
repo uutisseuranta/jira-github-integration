@@ -217,7 +217,7 @@
   },
   {
     "action_name": "Send web request",
-    "json_type": "jira.webrequest.action",
+    "json_type": "jira.web.request",
     "verified_cloud_compatible": true,
     "notes": "Verified via import into Jira Cloud. Old type 'jira.util.send.web.request' is obsolete."
   },
