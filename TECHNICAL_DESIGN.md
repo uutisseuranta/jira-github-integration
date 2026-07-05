@@ -658,6 +658,22 @@ Ennen PR:n hyväksymistä seuraavien CI-tarkistusten on mentävä onnistuneesti 
 
 ---
 
+## Persistointiarkkitehtuuri
+
+> **Arkkitehtuuripäätös G-010** — kirjattu `DECISION_LOG.csv`:ään 2026-07-05.
+
+Integraatio ei käytä erillistä state storea eikä integraatiotietokantaa. Jira ja
+GitHub säilyvät ainoina kanonisina totuuslähteinä kaikelle tilalle. Avoimet
+standardit (Jira REST API, GitHub REST API) tarjoavat kaiken tarvittavan suoraan
+APIn kautta — kolmatta järjestelmää ei tarvita.
+
+Webhook-duplikaatit, retryt ja kesken jääneet operaatiot ovat teoreettinen
+ongelma jonka todennäköisyys reaalimaailmassa on häviävän pieni. Tekninen
+metatietovarasto lisäisi kompleksiteettia joka ei maksa itseään takaisin. Jos
+ongelma joskus ilmenee, siitä avataan ops-bugi aikanaan. YAGNI.
+
+---
+
 ## Linkit
 
 - [Cloud Automation — resources](https://support.atlassian.com/cloud-automation/resources/)

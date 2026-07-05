@@ -65,6 +65,22 @@ class TestJiraRules(unittest.TestCase):
                         f"Tiedosto {f} sisältää kielletyn DELETE-kutsun labelille (päätös L-006)."
                     )
 
+    # Intentionaalisesti puuttuvat numerot (ks. DECISION_LOG.csv):
+    # saanto-06: ei käytössä (assignee-synkronointi poistettu D-005)
+    # saanto-10: poistettu (D-005)
+    # saanto-11: poistettu (prioriteettisynkronointi poistettu L-011)
+    EXPECTED_RULE_COUNT = 12  # 01-05, 07-09, 12-15
+
+    def test_loop_prevention_rule08(self):
+        """Varmistaa että saanto-08 sisältää silmukkaestoehdon ([Jira] tai Jira: etuliite)."""
+        f = 'saanto-08-github-comment-created.json'
+        if os.path.exists(f):
+            with open(f, 'r', encoding='utf-8') as fh:
+                content = fh.read()
+            # Ehdon on löydyttävä joko [Jira] tai Jira: etuliite skip-logiikkana
+            has_loop_guard = '[Jira]' in content or 'Jira:' in content
+            self.assertTrue(has_loop_guard, f"{f} ei sisällä silmukkaestoehtoa")
+
     def test_prefix_consistency(self):
         """Varmistaa päätöksen L-002 mukaisesti otsikoiden uudet lyhyet etuliitteet (Git: ja Jira:)."""
         # Sääntö 1 (luonti) ja Sääntö 2 (muokkaus) pitää kirjoittaa "Git: "

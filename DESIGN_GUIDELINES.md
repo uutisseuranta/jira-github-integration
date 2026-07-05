@@ -73,3 +73,14 @@ Perustelu: [DECISION_LOG.csv](https://github.com/uutisseuranta/jira-github-integ
 ## Poikkeukset
 
 Jos tekninen syy pakottaa poikkeamaan tästä dokumentista, sovelletaan samaa periaatetta kuin CODE_CONVENTIONS.md:ssä: kirjaa poikkeus `DECISION_LOG.csv`-tiedostoon, merkitse syy ja laajuus `rationale`-kenttään. Dokumentoimaton poikkeus on rikkomus — dokumentoitu poikkeus on tietoinen päätös.
+
+## Persistointiperiaate
+
+Integraatio ei käytä erillistä state storea eikä integraatiotietokantaa. Jira ja
+GitHub ovat kanonisia totuuslähteitä — avoimet standardit tarjoavat kaiken
+tarvittavan tilan suoraan APIn kautta.
+
+Webhook-duplikaatit ja retryt ovat teoreettinen ongelma jonka todennäköisyys on
+häviävän pieni. Jos ongelma joskus ilmenee, siitä avataan ops-bugi aikanaan.
+Kompleksiteettia ei lisätä spekulatiivisia ongelmia varten. Ks. päätösloki **G-010**.
+
