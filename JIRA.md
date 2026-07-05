@@ -6,7 +6,7 @@
 
 ## GitHub Secrets
 
-Tarvittavat secrets GitHub Actions -workflowille:
+Tarvittavat secrets GitHub Actions -workflowlle:
 
 | Secret | Arvo | Tila |
 |---|---|---|
@@ -28,6 +28,26 @@ GitHub-label määrittää Jira work item -tyypin:
 | `arch`, `sec` | Task |
 | `chore`, `docs`, `refactor`, `test` | Task |
 | ei labelia | Task (oletus) |
+
+---
+
+## Automation-sääntöjen hallinta
+
+### Importoi sääntö
+
+Avaa suoraan: **[https://uutisseuranta.atlassian.net/jira/settings/automation#/import](https://uutisseuranta.atlassian.net/jira/settings/automation#/import)**
+
+1. Lataa JSON-tiedosto reposta (ks. Tiedostot-taulukko alla)
+2. Klikkaa **Import** / **Import flow**
+3. Valitse projektiksi `US` (Uutisseuranta)
+4. Tallenna ja aktivoi
+
+### Audit log (vianetsintä)
+
+Avaa suoraan: **[https://uutisseuranta.atlassian.net/jira/settings/automation#/audit-log](https://uutisseuranta.atlassian.net/jira/settings/automation#/audit-log)**
+
+> **Huom:** Polku `Jira Settings → System → Automation` ei toimi tässä instanssissa.
+> Käytä aina suoria URL-linkkejä yllä.
 
 ---
 
