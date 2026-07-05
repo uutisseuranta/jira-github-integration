@@ -21,7 +21,6 @@
         "component": "TRIGGER",
         "type": "jira.incoming.webhook",
         "value": {
-          "webhookToken": "4aed5c2e19b6532368342c136e1f7211ce709f50",
           "searchOrProvide": "none",
           "jql": null
         },
@@ -103,12 +102,6 @@
           "ruleIdUuid": "019f288b-703a-7e52-bd20-d9cb4f5cb560",
           "tagType": "IS_RULE_UPDATED",
           "tagValue": "true"
-        },
-        {
-          "id": 10991417,
-          "ruleIdUuid": "019f288b-703a-7e52-bd20-d9cb4f5cb560",
-          "tagType": "WEBHOOK_TOKEN",
-          "tagValue": "4aed5c2e19b6532368342c136e1f7211ce709f50"
         }
       ],
       "ruleScope": {
