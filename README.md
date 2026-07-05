@@ -6,7 +6,9 @@ Automatisoitu kaksisuuntainen synkronointi GitHub Issuesin ja Jira-projektin vä
 
 ## ⚠️ Vaaditut Secrets
 
-Ennen kuin mikään toimii, lisää nämä **GitHub repository secretseihin** (`Settings → Secrets and variables → Actions`):
+Ennen kuin mikään toimii, lisää nämä **GitHub repository secretseihin** (`Settings → Secrets and variables → Actions`).
+
+Secretsejä voi hallinnoida myös **Rovo MCP Serverin** kautta paikallisella `mml`-työkalulla — katso ohje kohdasta [Secrets-hallinta mml-työkalulla](#secrets-hallinta-mml-työkalulla).
 
 | Secret | Kuvaus | Esimerkki |
 |--------|--------|--------|
@@ -19,6 +21,26 @@ Ennen kuin mikään toimii, lisää nämä **GitHub repository secretseihin** (`
 | `JIRA_WEBHOOK_TOKEN` | Jira Automation Webhook Secret Token | `satunnainenavainabc123...` |
 
 > **HUOM:** Jos `JIRA_BASE_URL` tai `JIRA_WEBHOOK_URL` puuttuu, Actions-workflow tai rele-työkulku epäonnistuu/hyppää yli välittömästi. Nykyiset Jira Cloud -automaatiot vaativat tietoturvasyistä `JIRA_WEBHOOK_TOKEN` -salaisuuden `HTTP 400 (Missing token)` -virheiden välttämiseksi.
+
+---
+
+## Secrets-hallinta mml-työkalulla
+
+Secretsejä voi lisätä, päivittää ja tarkistaa paikallisesti **Rovo MCP Serverin** `mml`-työkalun kautta ilman GitHub-selainkäyttöliittymää.
+
+Aseta tai päivitä secret:
+
+```
+mml github set-secret --repo uutisseuranta/jira-github-integration --name JIRA_API_TOKEN --value "ATATxxxx..."
+```
+
+Lista repon secretseistä (nimet näkyvät, arvot piilotettu):
+
+```
+mml github list-secrets --repo uutisseuranta/jira-github-integration
+```
+
+> **HUOM:** `mml`-työkalu edellyttää, että Rovo MCP Server on käynnissä paikallisesti ja `GH_PAT`-token on konfiguroitu sille oikein.
 
 ---
 
@@ -48,7 +70,7 @@ Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtais
 2. Paina oikeasta yläkulmasta **… (More actions) → Import flows**
 3. Valitse JSON-tiedosto reposta (ks. Tiedostot-taulukko alla)
 4. Valitse projektikohdistukseksi `US` (Uutisseuranta) ja haluamasi flowt
-5. Paina **Let’s do this**
+5. Paina **Let's do this**
 6. **Aktivoi tuodut flowt manuaalisesti** — kaikki tuodut flowt tulevat disabled-tilassa
 
 > **HUOM:** Jos samanniminen flow on jo olemassa, tuodun nimi muuttuu automaattisesti muotoon `Copy of [nimi]`. Tarkista duplikaatit ja poista vanhentunut versio.
@@ -94,7 +116,7 @@ Import tapahtuu **globaalin** Automation-näkymän kautta — ei projektikohtais
 
 ## Nopea aloitus
 
-1. Lisää secretit (katso taulukko yllä)
+1. Lisää secretit (katso taulukko yllä) — GitHub UI:lla tai `mml`-työkalulla
 2. Tuo JSON-flowt: **Jira settings → System → Automation flows → … → Import flows**
 3. Aktivoi tuodut flowt manuaalisesti (tulevat disabled-tilassa)
 4. Luo GitHub webhook (`Settings → Webhooks`) osoitteeseen jonka Jira tarjoaa
@@ -115,7 +137,7 @@ Tämä repositorio toimii uutisseuranta-organisaation keskitettynä integraatioh
 
 Otsikkosynkronointi on täysin kaksisuuntainen ja perustuu etuliitteisiin **`Git:`** ja **`Jira:`** (ilman hakasulkeita). Alkuperäinen luontipaikka määrittää tiketin master-järjestelmän: jos tiketti luodaan GitHubissa, se saa Jiraan etuliitteen `Git:`. Jira Automation tunnistaa tämän ja skippaa synkronoinnin takaisin GitHubiin, estäen ikuiset päivityssilmukat ilman viiveitä tai monimutkaista aritmetiikkaa (L-002).
 
-### 2. Automaattinen validointi (Test Coverage 100 %)
+### 2. Automaattinen validointi (Test Coverage 100 %)
 
 Kaikki JSON-muotoiset flowt (`saanto-*.json`) validoidaan automaattisesti jokaisessa PR- ja CI-ajossa Python-testiohjelmalla [`test-rules.py`](test-rules.py). Testit tarkistavat JSON-syntaksin, custom-kenttien käytön (`customfield_10071`–10073), etuliitteiden oikeellisuuden sekä varmistavat, ettei floweissa ole kiellettyjä label-poistoja (L-006).
 
