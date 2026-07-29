@@ -16,7 +16,7 @@ Vaaditut ympäristömuuttujat:
   JIRA_API_TOKEN    - Jira API Token
   JIRA_PROJECT_KEY  - Kohde-projektin avain (esim. US)
   GITHUB_REPO       - Lähde-repo (esim. uutisseuranta.github.io)
-  DRY_RUN           - 'true' = ei luo issueja, vain listaa (oletus: false)
+  DRY_RUN           - 'false' = luo issueja oikeasti (oletus: true = turvallinen)
 """
 
 import os
@@ -24,18 +24,36 @@ import sys
 import requests
 from requests.auth import HTTPBasicAuth
 
-GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
-JIRA_BASE_URL = os.environ["JIRA_BASE_URL"].rstrip("/")
-JIRA_EMAIL = os.environ["JIRA_EMAIL"]
-JIRA_API_TOKEN = os.environ["JIRA_API_TOKEN"]
-JIRA_PROJECT_KEY = os.environ["JIRA_PROJECT_KEY"]
-GITHUB_REPO = os.environ["GITHUB_REPO"]
-DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
+
+def _require_env(name: str) -> str:
+    """Palauttaa ympäristömuuttujan arvon tai lopettaa selkeällä virheviestillä.
+
+    KeyError on epäselvä käyttäjälle — tämä ohjaa suoraan skriptin docstringiin.
+    Periaate: Saltzer & Schroeder (1975) fail-safe default.
+    """
+    value = os.environ.get(name)
+    if not value:
+        sys.exit(f"Virhe: pakollinen ympäristömuuttuja {name!r} puuttuu. Katso skriptin docstring.")
+    return value
+
+
+GITHUB_TOKEN = _require_env("GITHUB_TOKEN")
+JIRA_BASE_URL = _require_env("JIRA_BASE_URL").rstrip("/")
+JIRA_EMAIL = _require_env("JIRA_EMAIL")
+JIRA_API_TOKEN = _require_env("JIRA_API_TOKEN")
+JIRA_PROJECT_KEY = _require_env("JIRA_PROJECT_KEY")
+GITHUB_REPO = _require_env("GITHUB_REPO")
+
+# Arkistoitu skripti: oletus true (turvallinen). Aseta DRY_RUN=false eksplisiittisesti
+# tuotantokäyttöä varten. Lue DECISION_LOG.csv D-004 ennen ajoa. (päätös L-037)
+DRY_RUN = os.environ.get("DRY_RUN", "true").lower() == "true"
+
 GITHUB_OWNER = "uutisseuranta"
 
 # Jira custom field ID:t — organisaatiokohtaiset, ks. DECISION_LOG.csv D-006
 CF_GITHUB_NUMBER = "customfield_10072"
 CF_GITHUB_REPO = "customfield_10071"
+
 
 def get_github_issues():
     """Hae kaikki avoimet issuet GitHubista (paginointi)."""
@@ -63,7 +81,7 @@ def create_jira_issue(gh_issue):
         "fields": {
             "project": {"key": JIRA_PROJECT_KEY},
             # Git:-etuliite noudattaa L-002 prefix-mekanismia: Jira Automation
-            # skipaa otsikkopäivityksen kun otsikko alkaa 'Git:' tai 'Jira:'
+            # skipaa otsikkopaivityksen kun otsikko alkaa 'Git:' tai 'Jira:'
             "summary": f"Git: {gh_issue['title']}",
             "description": {
                 "type": "doc",
@@ -75,7 +93,7 @@ def create_jira_issue(gh_issue):
                     },
                     {
                         "type": "paragraph",
-                        "content": [{"type": "text", "text": f"Alkuperäinen GitHub issue: {gh_issue['html_url']}"}],
+                        "content": [{"type": "text", "text": f"Alkuperainen GitHub issue: {gh_issue['html_url']}"}],
                     },
                 ],
             },
@@ -102,7 +120,7 @@ def main():
         print("*** DRY RUN - ei luoda Jira-issueja ***")
 
     issues = get_github_issues()
-    print(f"Löydettiin {len(issues)} avointa GitHub-issuea")
+    print(f"Loydetty {len(issues)} avointa GitHub-issuea")
 
     ok, fail = 0, 0
     for gh in issues:
@@ -117,7 +135,7 @@ def main():
         else:
             fail += 1
 
-    print(f"\nValmis: {ok} onnistui, {fail} epäonnistui")
+    print(f"\nValmis: {ok} onnistui, {fail} epaonnistui")
     if fail:
         sys.exit(1)
 
