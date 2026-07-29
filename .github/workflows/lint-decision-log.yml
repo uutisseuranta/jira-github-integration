@@ -15,7 +15,7 @@ jobs:
       - name: Tarkista header
         run: |
           HEADER=$(head -1 DECISION_LOG.csv)
-          EXPECTED="id,date,title,decision,rationale,affects_issues"
+          EXPECTED="id,date,timestamp,title,decision,rationale,affects_issues"
           if [ "$HEADER" != "$EXPECTED" ]; then
             echo "❌ Header väärä."
             echo "   Odotettu: $EXPECTED"
@@ -64,7 +64,7 @@ jobs:
       - name: Tarkista pakolliset kentät (ei tyhjiä id/date/title/decision)
         run: |
           FAIL=0
-          while IFS=',' read -r id date title decision rationale affects; do
+          while IFS=',' read -r id date timestamp title decision rationale affects; do
             if [ -z "$id" ] || [ -z "$date" ] || [ -z "$title" ] || [ -z "$decision" ]; then
               echo "❌ Pakollinen kenttä puuttuu rivillä: $id"
               FAIL=1
