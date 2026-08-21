@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-github_jira_sync.py — Bulk sync GitHub issues to Jira work items.
+github-jira-sync.py — Bulk sync GitHub issues to Jira work items.
 
 Logic:
   1. Fetch open issues from each configured GitHub repo (REST API).
@@ -9,7 +9,7 @@ Logic:
   4. If not found → create new work item.
   5. DRY_RUN=true (default) only prints what would be done.
 
-See GITHUB_JIRA_SYNC.md for full documentation.
+See github-jira-sync.md for full documentation.
 """
 
 import os
@@ -244,7 +244,7 @@ def main() -> None:
         sys.exit(1)
 
     mode = "DRY-RUN" if DRY_RUN else "LIVE"
-    log.info("=== github_jira_sync.py starting [%s] ===", mode)
+    log.info("=== github-jira-sync.py starting [%s] ===", mode)
     log.info("Repos: %s", ", ".join(GITHUB_REPOS))
     log.info("Jira project: %s", JIRA_PROJECT)
 
