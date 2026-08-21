@@ -1,8 +1,8 @@
-# GITHUB_JIRA_SYNC.md
+# github-jira-sync.md
 
 ## Mikä tämä on
 
-`github_jira_sync.py` on Python-skripti, joka hakee avoimet GitHub-issuet REST
+`github-jira-sync.py` on Python-skripti, joka hakee avoimet GitHub-issuet REST
 API:n kautta ja synkronoi ne Jiran work itemeihin. Skripti **täydentää**
 Jira Automation -floweja — se ei korvaa niitä. Automation hoitaa
 reaaliaikaiset tapahtumat (luonti, kommentti, status-muutos), skripti hoitaa
@@ -66,7 +66,7 @@ export JIRA_API_TOKEN="ATATTxxx"
 export JIRA_PROJECT_KEY="US"
 export DRY_RUN="true"  # oletusarvo, voi jättää pois
 
-python github_jira_sync.py
+python github-jira-sync.py
 ```
 
 Tarkista lokista, mitä skripti tekisi. Kun tulos näyttää oikealta:
@@ -75,13 +75,13 @@ Tarkista lokista, mitä skripti tekisi. Kun tulos näyttää oikealta:
 
 ```bash
 export DRY_RUN="false"
-python github_jira_sync.py
+python github-jira-sync.py
 ```
 
 ### 3. Cron-ajo (esimerkki)
 
 ```cron
-0 3 * * * cd /app && DRY_RUN=false python github_jira_sync.py >> /var/log/jira_sync.log 2>&1
+0 3 * * * cd /app && DRY_RUN=false python github-jira-sync.py >> /var/log/jira_sync.log 2>&1
 ```
 
 ---
